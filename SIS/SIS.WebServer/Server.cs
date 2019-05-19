@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 using SIS.WebServer.Routing;
 
@@ -41,17 +42,17 @@ namespace SIS.WebServer
 
                 Socket client = this.listener.AcceptSocket();
 
-                this.Listen(client);
+                Task.Run(() => this.Listen(client));
             }
         }
 
-        public void Listen(Socket client)
+        public async Task Listen(Socket client)
         {
             ConnectionHandler connectionHandler = new ConnectionHandler(
                 client, 
                 this.serverRoutingTable);
 
-            connectionHandler.ProcessRequest();
+            await connectionHandler.ProcessRequestAsync();
         }
     }
 }

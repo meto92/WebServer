@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 using SIS.HTTP.Common;
 using SIS.HTTP.Enums;
@@ -31,14 +32,14 @@ namespace SIS.WebServer
             this.serverRoutingTable = serverRoutingTable;
         }
 
-        private IHttpRequest ReadRequest()
+        private async Task<IHttpRequest> ReadRequest()
         {
             StringBuilder result = new StringBuilder();
             ArraySegment<byte> data = new ArraySegment<byte>(new byte[1024]);
 
             while (true)
             {
-                int readBytesCount = this.client.Receive(data.Array, SocketFlags.None);
+                int readBytesCount = await this.client.ReceiveAsync(data.Array, SocketFlags.None);
 
                 if (readBytesCount == 0)
                 {
@@ -75,23 +76,23 @@ namespace SIS.WebServer
             return this.serverRoutingTable.Get(httpRequest.RequestMethod, httpRequest.Path).Invoke(httpRequest);
         }        
 
-        private void PrepareResponse(IHttpResponse httpResponse)
+        private async Task PrepareResponse(IHttpResponse httpResponse)
         {
             byte[] byteSegments = httpResponse.GetBytes();
 
-            this.client.Send(byteSegments, SocketFlags.None);
+            await this.client.SendAsync(byteSegments, SocketFlags.None);
         }
 
         private void ShutdownClient()
             => this.client.Shutdown(SocketShutdown.Both);
 
-        public void ProcessRequest()
+        public async Task ProcessRequestAsync()
         {
             IHttpResponse httpResponse = null;
 
             try
             {
-                IHttpRequest httpRequest = this.ReadRequest();
+                IHttpRequest httpRequest = await this.ReadRequest();
 
                 if (httpRequest == null)
                 {
@@ -118,7 +119,7 @@ namespace SIS.WebServer
                 httpResponse = new TextResult(e.ToString(), HttpResponseStatusCode.InternalServerError);
             }
 
-            this.PrepareResponse(httpResponse);
+            await this.PrepareResponse(httpResponse);
             this.ShutdownClient();
         }
     }

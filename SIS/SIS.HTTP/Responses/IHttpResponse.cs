@@ -10,11 +10,13 @@ namespace SIS.HTTP.Responses
 
         IHttpHeaderCollection Headers { get; }
 
+        IHttpCookieCollection Cookies { get; }
+
+        void AddHeader(HttpHeader header);
+
         void AddCookie(HttpCookie cookie);
 
         byte[] Content { get; set; }
-
-        void AddHeader(HttpHeader header);
 
         byte[] GetBytes();
     }

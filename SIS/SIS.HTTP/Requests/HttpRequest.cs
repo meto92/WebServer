@@ -4,9 +4,11 @@ using System.Linq;
 using System.Net;
 
 using SIS.HTTP.Common;
+using SIS.HTTP.Cookies;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Exceptions;
 using SIS.HTTP.Headers;
+using SIS.HTTP.Sessions;
 
 namespace SIS.HTTP.Requests
 {
@@ -19,6 +21,7 @@ namespace SIS.HTTP.Requests
             this.FormData = new Dictionary<string, object>();
             this.QueryData = new Dictionary<string, object>();
             this.Headers = new HttpHeaderCollection();
+            this.Cookies = new HttpCookieCollection();
             
             this.ParseRequest(requestString);
         }
@@ -35,6 +38,10 @@ namespace SIS.HTTP.Requests
 
         public HttpRequestMethod RequestMethod { get; private set; }
       
+        public IHttpCookieCollection Cookies { get; }
+
+        public IHttpSession Session { get; set; }
+
         private bool IsValidRequestLine(string[] requestLineParameters)
             => requestLineParameters.Length == 3
                 && requestLineParameters[2] == GlobalConstants.HttpOneProtocolFragment;
@@ -91,7 +98,27 @@ namespace SIS.HTTP.Requests
 
         private void ParseCookies()
         {
-            
+            if (!this.Headers.ContainsHeader(HttpHeader.Cookie))
+            {
+                return;
+            }
+
+            string cookiesValue = this.Headers
+                .GetHeader(HttpHeader.Cookie)
+                .Value;
+
+            string[] cookieParts = cookiesValue.Split("; ");
+
+            foreach (string[] cookieKvp in cookieParts
+                .Select(kvp => kvp.Split("=", 2))
+                .Where(kvp => kvp.Length == 2))
+            {
+                (string key, string value) = (cookieKvp[0], cookieKvp[1]);
+
+                HttpCookie cookie = new HttpCookie(key, value, false);
+
+                this.Cookies.AddCookie(cookie);
+            }
         }
 
         private void SaveParameters(string[] parameters, IDictionary<string, object> dict)

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 
 using SIS.HTTP.Common;
+using SIS.HTTP.Cookies;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Extensions;
 using SIS.HTTP.Headers;
@@ -14,6 +15,7 @@ namespace SIS.HTTP.Responses
         public HttpResponse()
         {
             this.Headers = new HttpHeaderCollection();
+            this.Cookies = new HttpCookieCollection();
             this.Content = new byte[0];
         }
 
@@ -24,6 +26,11 @@ namespace SIS.HTTP.Responses
         public HttpResponseStatusCode StatusCode { get ; set ; }
 
         public IHttpHeaderCollection Headers { get; }
+
+        public IHttpCookieCollection Cookies { get; }
+
+        public void AddCookie(HttpCookie cookie)
+            => this.Cookies.AddCookie(cookie);
 
         public byte[] Content { get; set; }
 
@@ -47,11 +54,30 @@ namespace SIS.HTTP.Responses
         }
 
         public override string ToString()
-            => string.Concat(
+        {
+            StringBuilder cookieHeaders = new StringBuilder();
+
+            this.Cookies
+                .ToList()
+                .ForEach(cookie =>
+                {
+                    HttpHeader cookieHeader = new HttpHeader(
+                        HttpHeader.SetCookie, 
+                        cookie.ToString());
+
+                    cookieHeaders.Append(cookieHeader.ToString())
+                        .Append(GlobalConstants.HttpNewLine);
+                });
+
+            string result = string.Concat(
                 $"{GlobalConstants.HttpOneProtocolFragment} {this.StatusCode.GetResponseLine()}",
                 GlobalConstants.HttpNewLine,
                 this.Headers,
                 GlobalConstants.HttpNewLine,
+                cookieHeaders.ToString(),
                 GlobalConstants.HttpNewLine);
+            
+            return result;
+        }
     }
 }

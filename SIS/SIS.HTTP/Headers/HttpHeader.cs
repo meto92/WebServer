@@ -9,6 +9,8 @@ namespace SIS.HTTP.Headers
         public const string ContentTypeText = "text/plain";
         public const string ContentTypeHtml = "text/html";
         public const string Location = "Location";
+        public const string Cookie = "Cookie";
+        public const string SetCookie = "Set-Cookie";
 
         public HttpHeader(string key, string value)
         {

@@ -5,7 +5,7 @@ namespace SIS.Demo
 {
     public class Startup
     {
-        static void Main()
+        public static void Main()
         {
             IServerRoutingTable routes = new ServerRoutingTable();
 

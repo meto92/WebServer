@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,11 +64,36 @@ namespace SIS.WebServer
                 : new HttpRequest(result.ToString());
         }
 
+        private IHttpResponse ReturnIfResource(string httpRequestPath)
+        {
+            string filePath = Directory.GetCurrentDirectory() + httpRequestPath;
+
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
+            byte[] content = File.ReadAllBytes(filePath);
+
+            IHttpResponse response = new InlineResourceResult(content, HttpResponseStatusCode.OK);
+
+            return response;
+        }
+
         private IHttpResponse HandleRequest(IHttpRequest httpRequest)
         {
-            if (!this.serverRoutingTable.Contains(httpRequest.RequestMethod, httpRequest.Path))
+            if (this.serverRoutingTable.Contains(httpRequest.RequestMethod, httpRequest.Path))
             {
-                return new TextResult(
+                return this.serverRoutingTable
+                    .Get(httpRequest.RequestMethod, httpRequest.Path)
+                    .Invoke(httpRequest);
+            }
+
+            IHttpResponse response = this.ReturnIfResource(httpRequest.Path);
+
+            if (response == null)
+            {
+                response = new TextResult(
                     string.Format(
                         ActionNotFoundMessage,
                         httpRequest.RequestMethod,
@@ -75,8 +101,8 @@ namespace SIS.WebServer
                     HttpResponseStatusCode.NotFound);
             }
 
-            return this.serverRoutingTable.Get(httpRequest.RequestMethod, httpRequest.Path).Invoke(httpRequest);
-        }        
+            return response;
+        }
 
         private async Task PrepareResponse(IHttpResponse httpResponse)
         {

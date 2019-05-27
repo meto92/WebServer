@@ -1,0 +1,26 @@
+﻿<div class="container-fluid row">
+    <div class="col-md-6 mx-auto">
+        <h1 class="text-success text-center">Create Album</h1>
+
+        <hr class="bg-success" />
+
+        <form action="/Albums/Create" method="POST">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" placeholder="Name..." class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <label for="cover">Cover</label>
+                <input type="url" name="cover" id="cover" placeholder="Cover..." class="form-control" />
+            </div>
+
+            <hr class="bg-success" />
+
+            <div class="d-flex justify-content-around mb-3">
+                <input type="submit" value="Create" class="text-white btn btn-sm bg-success" />
+                <a href="/Albums/All" class="text-white btn btn-sm bg-success">Back To All</a>
+            </div>
+        </form>
+    </div>
+</div>

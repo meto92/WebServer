@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 
-namespace SIS.HTTP.Sessions
+using SIS.HTTP.Sessions;
+
+namespace SIS.WebServer.Sessions
 {
     public class HttpSessionStorage
     {

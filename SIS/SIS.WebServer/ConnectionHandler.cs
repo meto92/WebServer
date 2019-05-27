@@ -10,9 +10,9 @@ using SIS.HTTP.Enums;
 using SIS.HTTP.Exceptions;
 using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
-using SIS.HTTP.Sessions;
 using SIS.WebServer.Results;
 using SIS.WebServer.Routing;
+using SIS.WebServer.Sessions;
 
 namespace SIS.WebServer
 {
@@ -66,7 +66,7 @@ namespace SIS.WebServer
 
         private IHttpResponse ReturnIfResource(string httpRequestPath)
         {
-            string filePath = Directory.GetCurrentDirectory() + httpRequestPath;
+            string filePath = "../../../" + httpRequestPath;
 
             if (!File.Exists(filePath))
             {
@@ -89,17 +89,13 @@ namespace SIS.WebServer
                     .Invoke(httpRequest);
             }
 
-            IHttpResponse response = this.ReturnIfResource(httpRequest.Path);
-
-            if (response == null)
-            {
-                response = new TextResult(
+            IHttpResponse response = this.ReturnIfResource(httpRequest.Path)
+                ?? new TextResult(
                     string.Format(
                         ActionNotFoundMessage,
                         httpRequest.RequestMethod,
                         httpRequest.Path),
                     HttpResponseStatusCode.NotFound);
-            }
 
             return response;
         }
@@ -116,15 +112,15 @@ namespace SIS.WebServer
 
         private string SetRequestSession(IHttpRequest httpRequest)
         {
-            string id = httpRequest.Cookies.ContainsCookie(HttpSessionStorage.SessionCookieKey)
+            string sessionId = httpRequest.Cookies.ContainsCookie(HttpSessionStorage.SessionCookieKey)
                 ? httpRequest.Cookies
                     .GetCookie(HttpSessionStorage.SessionCookieKey)
                     .Value
                 : Guid.NewGuid().ToString();
 
-            httpRequest.Session = HttpSessionStorage.GetSession(id);
+            httpRequest.Session = HttpSessionStorage.GetSession(sessionId);
 
-            return id;
+            return httpRequest.Session.Id;
         }
 
         public async Task ProcessRequestAsync()
@@ -147,9 +143,9 @@ namespace SIS.WebServer
                     httpRequest.RequestMethod,
                     httpRequest.Path));
 
-                httpResponse = this.HandleRequest(httpRequest);
-
                 string sessionId = SetRequestSession(httpRequest);
+
+                httpResponse = this.HandleRequest(httpRequest);
 
                 httpResponse.AddCookie(new HttpCookie(
                     HttpSessionStorage.SessionCookieKey, 

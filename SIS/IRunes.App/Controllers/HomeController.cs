@@ -15,14 +15,14 @@ namespace IRunes.Controllers
 
             if (username == null)
             {
-                return View("home/guest", false);
+                return View("guest");
             }
 
             ViewData["username"] = username;
 
             Request.Session.AddParameter("username", username);
 
-            return View("home/loggedInUser");
+            return View("loggedInUser");
         }
     }
 }

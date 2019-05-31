@@ -7,20 +7,20 @@ using SIS.HTTP.Responses;
 
 namespace IRunes.Controllers
 {
-    public class UserController : Controller
+    public class UsersController : Controller
     {
         private const int MinUsernameLength = 3;
         private const int MinPasswordLength = 4;
 
-        public UserController(IHttpRequest request) 
+        public UsersController(IHttpRequest request) 
             : base(request)
         { }
 
-        public IHttpResponse GetLogin()
+        public IHttpResponse Login()
         {
             Request.Session.ClearParameters();
 
-            return View("user/login", false);
+            return View();
         }
 
         private IHttpResponse ValidateUsernameAndPassword(string username, string password)
@@ -68,14 +68,14 @@ namespace IRunes.Controllers
             return response;
         }
 
-        public IHttpResponse GetRegister()
+        public IHttpResponse Register()
         {
             if (IsLoggedIn())
             {
                 Request.Session.ClearParameters();
             }
 
-            return View("user/register", false);
+            return View();
         }
 
         public IHttpResponse PostRegister(RegisterUserViewModel model)

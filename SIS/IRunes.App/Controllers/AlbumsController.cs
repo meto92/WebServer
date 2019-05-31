@@ -9,12 +9,12 @@ using SIS.HTTP.Responses;
 
 namespace IRunes.Controllers
 {
-    public class AlbumController : Controller
+    public class AlbumsController : Controller
     {
         private const int MinAlbumNameLength = 3;
         private const int MinAlbumCoverLength = 3;
 
-        public AlbumController(IHttpRequest request)
+        public AlbumsController(IHttpRequest request)
             : base(request)
         { }
 
@@ -40,12 +40,12 @@ namespace IRunes.Controllers
                 ? "There are currently no albums."
                 : result.ToString();
 
-            return View("albums/all");
+            return View();
         }
 
-        public IHttpResponse GetCreate()
+        public IHttpResponse Create()
             => IsLoggedIn()
-                ? View("albums/create")
+                ? View()
                 : Redirect("/Users/Login");
 
         public IHttpResponse PostCreate(CreateAlbumViewModel model)
@@ -109,7 +109,7 @@ namespace IRunes.Controllers
             ViewData["albumId"] = album.Id;
             ViewData["tracks"] = tracksResult.ToString();
 
-            return View("albums/details");
+            return View();
         }
     }
 }

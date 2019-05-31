@@ -8,16 +8,16 @@ using SIS.HTTP.Responses;
 
 namespace IRunes.Controllers
 {
-    public class TrackController : Controller
+    public class TracksController : Controller
     {
         private const int MinTrackNameLength = 3;
         private const int MinTrackLinkLength = 7;
 
-        public TrackController(IHttpRequest request)
+        public TracksController(IHttpRequest request)
             : base(request)
         { }
 
-        public IHttpResponse GetCreate()
+        public IHttpResponse Create()
         {
             if (!IsLoggedIn())
             {
@@ -31,7 +31,7 @@ namespace IRunes.Controllers
 
             ViewData["albumId"] = (string) albumId;
 
-            return View("tracks/create");
+            return View();
         }
 
         public IHttpResponse PostCreate(CreateTrackViewModel model)
@@ -100,7 +100,7 @@ namespace IRunes.Controllers
             ViewData["price"] = $"${track.Price:f2}";
             ViewData["albumId"] = (string) albumId;
 
-            return View("tracks/details");
+            return View();
         }
     }
 }

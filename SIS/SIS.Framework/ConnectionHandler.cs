@@ -4,17 +4,17 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
+using SIS.Framework.Results;
+using SIS.Framework.Routing;
+using SIS.Framework.Sessions;
 using SIS.HTTP.Common;
 using SIS.HTTP.Cookies;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Exceptions;
 using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
-using SIS.WebServer.Results;
-using SIS.WebServer.Routing;
-using SIS.WebServer.Sessions;
 
-namespace SIS.WebServer
+namespace SIS.Framework
 {
     public class ConnectionHandler
     {

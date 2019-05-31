@@ -10,11 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\IRunes.Data\IRunes.Data.csproj" />
     <ProjectReference Include="..\IRunes.Services\IRunes.Services.csproj" />
-    <ProjectReference Include="..\SIS.WebServer\SIS.WebServer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
+    <ProjectReference Include="..\SIS.Framework\SIS.Framework.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,10 +56,10 @@
     <None Update="Views\Tracks\Details.html">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Views\User\Login.html">
+    <None Update="Views\Users\Login.html">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Views\User\Register.html">
+    <None Update="Views\Users\Register.html">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -5,9 +5,7 @@ VisualStudioVersion = 16.0.28902.138
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.HTTP", "SIS.HTTP\SIS.HTTP.csproj", "{1E0D805B-DD35-4C3A-B664-CF1FDF962C4C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.WebServer", "SIS.WebServer\SIS.WebServer.csproj", "{E22FA7FC-9BB3-4BA8-B9B5-85C0244853AB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.Demo", "SIS.Demo\SIS.Demo.csproj", "{3C004A44-AAFC-47D1-B325-9476A686A37B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.Framework", "SIS.Framework\SIS.Framework.csproj", "{E22FA7FC-9BB3-4BA8-B9B5-85C0244853AB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{A4973DBB-D0A5-4AD8-B9BC-ABA052D3BD90}"
 EndProject
@@ -19,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Data", "IRunes.Data\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Models", "IRunes.Models\IRunes.Models.csproj", "{2FF0155E-B709-4C20-BB87-045B5D699CDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRunes.Services", "IRunes.Services\IRunes.Services.csproj", "{C8BC9FF6-ABF8-45C9-8296-4392CCA3A381}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Services", "IRunes.Services\IRunes.Services.csproj", "{C8BC9FF6-ABF8-45C9-8296-4392CCA3A381}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		{E22FA7FC-9BB3-4BA8-B9B5-85C0244853AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E22FA7FC-9BB3-4BA8-B9B5-85C0244853AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E22FA7FC-9BB3-4BA8-B9B5-85C0244853AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3C004A44-AAFC-47D1-B325-9476A686A37B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3C004A44-AAFC-47D1-B325-9476A686A37B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3C004A44-AAFC-47D1-B325-9476A686A37B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3C004A44-AAFC-47D1-B325-9476A686A37B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3BC57DF3-AADE-4B2F-8DC7-AC84BB925910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3BC57DF3-AADE-4B2F-8DC7-AC84BB925910}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BC57DF3-AADE-4B2F-8DC7-AC84BB925910}.Release|Any CPU.ActiveCfg = Release|Any CPU

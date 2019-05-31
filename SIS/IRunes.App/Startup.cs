@@ -4,63 +4,13 @@ using IRunes.ViewModels;
 
 using Microsoft.EntityFrameworkCore;
 
-using SIS.WebServer;
-using SIS.WebServer.Routing;
+using SIS.Framework;
+using SIS.Framework.Routing;
 
 namespace IRunes
 {
-    public class Startup
+    public class Startup : IMvcApplication
     {
-        private static void ConfigureRoutes(IServerRoutingTable routes)
-        {
-            routes.Get("/", req => new HomeController(req).Index());
-            routes.Get("/Home/Index", req => new HomeController(req).Index());
-
-            routes.Get("/Users/Login", req => new UserController(req).GetLogin());
-
-            routes.Post(
-                "/Users/Login",
-                req => new UserController(req)
-                    .PostLogin(new LoginUserViewModel(
-                        (string)req.FormData["usernameOrEmail"],
-                        (string)req.FormData["password"])));
-
-            routes.Get("/Users/Register", req => new UserController(req).GetRegister());
-
-            routes.Post(
-                "/Users/Register",
-                req => new UserController(req)
-                    .PostRegister(new RegisterUserViewModel(
-                        (string)req.FormData["username"],
-                        (string)req.FormData["password"],
-                        (string)req.FormData["confirmPassword"],
-                        (string)req.FormData["email"])));
-
-            routes.Get("/Users/Logout", req => new UserController(req).Logout());
-
-            routes.Get("/Albums/All", req => new AlbumController(req).All());
-            routes.Get("/Albums/Create", req => new AlbumController(req).GetCreate());
-
-            routes.Post(
-                "/Albums/Create",
-                req => new AlbumController(req)
-                    .PostCreate(new CreateAlbumViewModel(
-                        (string)req.FormData["name"],
-                        (string)req.FormData["cover"])));
-
-            routes.Get("/Albums/Details", req => new AlbumController(req).Details());
-            routes.Get("/Tracks/Create", req => new TrackController(req).GetCreate());
-
-            routes.Post(
-                "/Tracks/Create",
-                req => new TrackController(req).PostCreate(new CreateTrackViewModel(
-                    (string)req.FormData["name"],
-                    (string)req.FormData["link"],
-                    (string)req.FormData["price"])));
-
-            routes.Get("/Tracks/Details", req => new TrackController(req).Details());
-        }
-
         private static void MigrateDatabase()
         {
             using (RunesDbContext db = new RunesDbContext())
@@ -69,15 +19,61 @@ namespace IRunes
             }
         }
 
-        public static void Main()
+        public void Configure(IServerRoutingTable serverRoutingTable)
         {
-            MigrateDatabase();
+            //MigrateDatabase();
 
-            IServerRoutingTable serverRoutingTable = new ServerRoutingTable();
+            serverRoutingTable.Get("/", req => new HomeController(req).Index());
+            serverRoutingTable.Get("/Home/Index", req => new HomeController(req).Index());
+
+            serverRoutingTable.Get("/Users/Login", req => new UsersController(req).Login());
+
+            serverRoutingTable.Post(
+                "/Users/Login",
+                req => new UsersController(req)
+                    .PostLogin(new LoginUserViewModel(
+                        (string)req.FormData["usernameOrEmail"],
+                        (string)req.FormData["password"])));
+
+            serverRoutingTable.Get("/Users/Register", req => new UsersController(req).Register());
+
+            serverRoutingTable.Post(
+                "/Users/Register",
+                req => new UsersController(req)
+                    .PostRegister(new RegisterUserViewModel(
+                        (string)req.FormData["username"],
+                        (string)req.FormData["password"],
+                        (string)req.FormData["confirmPassword"],
+                        (string)req.FormData["email"])));
+
+            serverRoutingTable.Get("/Users/Logout", req => new UsersController(req).Logout());
+
+            serverRoutingTable.Get("/Albums/All", req => new AlbumsController(req).All());
+            serverRoutingTable.Get("/Albums/Create", req => new AlbumsController(req).Create());
+
+            serverRoutingTable.Post(
+                "/Albums/Create",
+                req => new AlbumsController(req)
+                    .PostCreate(new CreateAlbumViewModel(
+                        (string)req.FormData["name"],
+                        (string)req.FormData["cover"])));
+
+            serverRoutingTable.Get("/Albums/Details", req => new AlbumsController(req).Details());
+            serverRoutingTable.Get("/Tracks/Create", req => new TracksController(req).Create());
+
+            serverRoutingTable.Post(
+                "/Tracks/Create",
+                req => new TracksController(req).PostCreate(new CreateTrackViewModel(
+                    (string)req.FormData["name"],
+                    (string)req.FormData["link"],
+                    (string)req.FormData["price"])));
+
+            serverRoutingTable.Get("/Tracks/Details", req => new TracksController(req).Details());
+        }
+
+        public void ConfigureServices()
+        {
             
-            ConfigureRoutes(serverRoutingTable);
-
-            new Server(80, serverRoutingTable).Run();
         }
     }
 }

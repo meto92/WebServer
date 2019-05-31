@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 using IRunes.Data;
 using IRunes.Services;
 using IRunes.Services.Contracts;
 
+using SIS.Framework.Results;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
-using SIS.WebServer.Results;
 
 namespace IRunes.Controllers
 {
@@ -75,6 +76,14 @@ namespace IRunes.Controllers
             this.SetPlaceholdersContent(ref html);
 
             return new HtmlResult(html, httpResponseStatusCode);
+        }
+
+        protected IHttpResponse View([CallerMemberName]string action = "")
+        {
+            string fullControllerName = this.GetType().Name;
+            string controllerName = fullControllerName.Substring(0, fullControllerName.Length - nameof(Controller).Length);
+
+            return View($"{controllerName}/{action}", this.IsLoggedIn());
         }
 
         protected IHttpResponse BadRequestError(string errorMessage)

@@ -3,14 +3,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-using SIS.WebServer.Routing;
+using SIS.Framework.Routing;
 
-namespace SIS.WebServer
+namespace SIS.Framework
 {
     public class Server
     {
         private const string LocalHostIPAddress = "127.0.0.1";
-        private const string WaitingForClientMessage = "Waiting for client . . .";
         private const string ServerStartedMessage = "Server startet at http://{0}:{1}";
 
         private readonly int port;
@@ -38,8 +37,6 @@ namespace SIS.WebServer
 
             while (this.isRunning)
             {
-                Console.WriteLine(WaitingForClientMessage);
-
                 Socket client = this.listener.AcceptSocket();
 
                 Task.Run(() => this.Listen(client));

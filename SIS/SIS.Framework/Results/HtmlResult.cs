@@ -5,7 +5,7 @@ using SIS.HTTP.Enums;
 using SIS.HTTP.Headers;
 using SIS.HTTP.Responses;
 
-namespace SIS.WebServer.Results
+namespace SIS.Framework.Results
 {
     public class HtmlResult : HttpResponse
     {
@@ -14,11 +14,11 @@ namespace SIS.WebServer.Results
             HttpResponseStatusCode responseStatusCode)
             : base(responseStatusCode)
         {
-            HttpHeader contentTypeHeaderr = 
+            HttpHeader contentTypeHeaderr =
                 new HttpHeader(
-                    HttpHeader.ContentType, 
+                    HttpHeader.ContentType,
                     HttpHeader.ContentTypeHtml + "; " + GlobalConstants.CharsetUTF8);
-            
+
             this.Headers.AddHeader(contentTypeHeaderr);
             this.Content = Encoding.UTF8.GetBytes(content);
         }

@@ -3,8 +3,8 @@
 using IRunes.Models;
 using IRunes.ViewModels;
 
-using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
+using SIS.MvcFramework.Attributes.Methods;
 
 namespace IRunes.Controllers
 {
@@ -12,10 +12,6 @@ namespace IRunes.Controllers
     {
         private const int MinTrackNameLength = 3;
         private const int MinTrackLinkLength = 7;
-
-        public TracksController(IHttpRequest request)
-            : base(request)
-        { }
 
         public IHttpResponse Create()
         {
@@ -34,6 +30,7 @@ namespace IRunes.Controllers
             return View();
         }
 
+        [HttpPost(ActionName = nameof(Create))]
         public IHttpResponse PostCreate(CreateTrackViewModel model)
         {
             if (!IsLoggedIn())

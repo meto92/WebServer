@@ -1,13 +1,13 @@
-﻿using SIS.HTTP.Requests;
-using SIS.HTTP.Responses;
+﻿using SIS.HTTP.Responses;
+using SIS.MvcFramework.Attributes.Methods;
 
 namespace IRunes.Controllers
 {
     public class HomeController : Controller
     {
-        public HomeController(IHttpRequest request) 
-            : base(request)
-        { }
+        [HttpGet(Path = "/")]
+        public IHttpResponse IndexSlash()
+            => Index();
 
         public IHttpResponse Index()
         {

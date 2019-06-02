@@ -10,7 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\IRunes.Data\IRunes.Data.csproj" />
     <ProjectReference Include="..\IRunes.Services\IRunes.Services.csproj" />
-    <ProjectReference Include="..\SIS.Framework\SIS.Framework.csproj" />
+    <ProjectReference Include="..\SIS.MvcFramework\SIS.MvcFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>

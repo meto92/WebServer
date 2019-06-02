@@ -4,8 +4,8 @@ using System.Text;
 using IRunes.Models;
 using IRunes.ViewModels;
 
-using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
+using SIS.MvcFramework.Attributes.Methods;
 
 namespace IRunes.Controllers
 {
@@ -13,10 +13,6 @@ namespace IRunes.Controllers
     {
         private const int MinAlbumNameLength = 3;
         private const int MinAlbumCoverLength = 3;
-
-        public AlbumsController(IHttpRequest request)
-            : base(request)
-        { }
 
         public IHttpResponse All()
         {
@@ -48,13 +44,14 @@ namespace IRunes.Controllers
                 ? View()
                 : Redirect("/Users/Login");
 
+        [HttpPost(ActionName = nameof(Create))]
         public IHttpResponse PostCreate(CreateAlbumViewModel model)
         {
             if (!IsLoggedIn())
             {
                 return Redirect("/Users/Login");
             }
-            
+
             if (model.Name.Length < MinAlbumNameLength
                 || model.Cover.Length < MinAlbumCoverLength)
             {

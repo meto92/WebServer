@@ -3,7 +3,6 @@ using System.Linq;
 
 using IRunes.Data;
 using IRunes.Models;
-using IRunes.Services.Contracts;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -18,11 +17,8 @@ namespace IRunes.Services
 
         public void Add(Album album)
         {
-            using (this.db)
-            {
-                this.db.Albums.Add(album);
-                this.db.SaveChanges();
-            }
+            this.db.Albums.Add(album);
+            this.db.SaveChanges();
         }
 
         public IEnumerable<Album> All()

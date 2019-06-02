@@ -1,6 +1,6 @@
 ﻿using IRunes.Models;
 
-namespace IRunes.Services.Contracts
+namespace IRunes.Services
 {
     public interface IUserService
     {

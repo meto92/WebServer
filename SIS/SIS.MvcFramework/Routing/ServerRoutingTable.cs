@@ -6,7 +6,7 @@ using SIS.HTTP.Enums;
 using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
 
-namespace SIS.Framework.Routing
+namespace SIS.MvcFramework.Routing
 {
     public class ServerRoutingTable : IServerRoutingTable
     {
@@ -39,9 +39,7 @@ namespace SIS.Framework.Routing
             => this.routes[HttpRequestMethod.Delete][path] = func;
 
         public void Add(HttpRequestMethod method, string path, Func<IHttpRequest, IHttpResponse> func)
-        {
-            throw new NotImplementedException();
-        }
+            => this.routes[method][path] = func;
 
         public bool Contains(HttpRequestMethod requestMethod, string path)
             => this.routes[requestMethod].ContainsKey(path);

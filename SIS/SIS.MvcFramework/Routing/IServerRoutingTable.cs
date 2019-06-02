@@ -4,7 +4,7 @@ using SIS.HTTP.Enums;
 using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
 
-namespace SIS.Framework.Routing
+namespace SIS.MvcFramework.Routing
 {
     public interface IServerRoutingTable
     {

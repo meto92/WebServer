@@ -2,8 +2,8 @@
 using IRunes.ViewModels;
 
 using SIS.HTTP.Cookies;
-using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
+using SIS.MvcFramework.Attributes.Methods;
 
 namespace IRunes.Controllers
 {
@@ -11,10 +11,6 @@ namespace IRunes.Controllers
     {
         private const int MinUsernameLength = 3;
         private const int MinPasswordLength = 4;
-
-        public UsersController(IHttpRequest request) 
-            : base(request)
-        { }
 
         public IHttpResponse Login()
         {
@@ -38,6 +34,7 @@ namespace IRunes.Controllers
             return null;
         }
 
+        [HttpPost(ActionName = nameof(Login))]
         public IHttpResponse PostLogin(LoginUserViewModel model)
         {
             model.UsernameOrEmail = model.UsernameOrEmail.Trim();
@@ -78,6 +75,7 @@ namespace IRunes.Controllers
             return View();
         }
 
+        [HttpPost(ActionName = nameof(Register))]
         public IHttpResponse PostRegister(RegisterUserViewModel model)
         {
             model.Username = model.Username.Trim();
@@ -89,7 +87,7 @@ namespace IRunes.Controllers
                 return responseForValidation;
             }
 
-            if (model.Password != model.Confirmpassword
+            if (model.Password != model.ConfirmPassword
                 || model.Email.Length < 5)
             {
                 return Redirect("/Users/Register");

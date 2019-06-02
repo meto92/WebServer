@@ -1,6 +1,5 @@
 ﻿using IRunes.Data;
 using IRunes.Models;
-using IRunes.Services.Contracts;
 
 namespace IRunes.Services
 {
@@ -13,11 +12,8 @@ namespace IRunes.Services
 
         public void Add(Track track)
         {
-            using (this.db)
-            {
-                this.db.Tracks.Add(track);
-                this.db.SaveChanges();
-            }
+            this.db.Tracks.Add(track);
+            this.db.SaveChanges();
         }
     }
 }

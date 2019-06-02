@@ -1,4 +1,4 @@
-﻿using SIS.Framework;
+﻿using SIS.MvcFramework;
 
 namespace IRunes.App
 {

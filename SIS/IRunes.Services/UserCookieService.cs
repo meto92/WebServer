@@ -3,8 +3,6 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-using IRunes.Services.Contracts;
-
 namespace IRunes.Services
 {
     public class UserCookieService : IUserCookieService

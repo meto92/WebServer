@@ -3,7 +3,6 @@ using System.Linq;
 
 using IRunes.Data;
 using IRunes.Models;
-using IRunes.Services.Contracts;
 
 namespace IRunes.Services
 {
@@ -23,17 +22,14 @@ namespace IRunes.Services
                 Email = email
             };
 
-            using (db)
+            try
             {
-                try
-                {
-                    db.Users.Add(user);
-                    db.SaveChanges();
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
+                db.Users.Add(user);
+                db.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return false;
             }
 
             return true;

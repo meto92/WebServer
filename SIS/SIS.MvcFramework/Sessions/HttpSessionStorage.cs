@@ -2,7 +2,7 @@
 
 using SIS.HTTP.Sessions;
 
-namespace SIS.Framework.Sessions
+namespace SIS.MvcFramework.Sessions
 {
     public class HttpSessionStorage
     {

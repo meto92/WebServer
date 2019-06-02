@@ -5,7 +5,7 @@ using SIS.HTTP.Enums;
 using SIS.HTTP.Headers;
 using SIS.HTTP.Responses;
 
-namespace SIS.Framework.Results
+namespace SIS.MvcFramework.Results
 {
     public class TextResult : HttpResponse
     {

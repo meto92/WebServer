@@ -1,4 +1,4 @@
-﻿namespace IRunes.Services.Contracts
+﻿namespace IRunes.Services
 {
     public interface IHashService
     {

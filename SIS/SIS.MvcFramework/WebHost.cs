@@ -3,21 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-using SIS.MvcFramework.Routing;
-using SIS.HTTP.Responses;
-using SIS.MvcFramework.Attributes.Methods;
 using SIS.HTTP.Enums;
+using SIS.HTTP.Responses;
+using SIS.MvcFramework.Attributes.Action;
+using SIS.MvcFramework.Attributes.Methods;
+using SIS.MvcFramework.Attributes.Security;
+using SIS.MvcFramework.Identity;
+using SIS.MvcFramework.Mapping;
+using SIS.MvcFramework.Results;
+using SIS.MvcFramework.Routing;
 
 namespace SIS.MvcFramework
 {
     public static class WebHost
     {
-        private static readonly IDictionary<Type, object> controllerInstances;
+        private const string UnauthorizedRedirectUrl = "/Users/Login";
+
         private static readonly IDictionary<Type, Dictionary<MethodInfo, ParameterInfo[]>> parametersByActionByControllerType;
 
         static WebHost()
         {
-            controllerInstances = new Dictionary<Type, object>();
             parametersByActionByControllerType = new Dictionary<Type, Dictionary<MethodInfo, ParameterInfo[]>>();
         }
 
@@ -37,11 +42,11 @@ namespace SIS.MvcFramework
 
             foreach (Type controllerType in controllerTypes)
             {
-                controllerInstances[controllerType] = CreateController(controllerType);
                 parametersByActionByControllerType[controllerType] = new Dictionary<MethodInfo, ParameterInfo[]>();
 
                 controllerType.GetMethods()
-                    .Where(action => typeof(IHttpResponse).IsAssignableFrom(action.ReturnType)
+                    .Where(action => action.GetCustomAttribute<NonActionAttribute>() == null
+                        && typeof(IHttpResponse).IsAssignableFrom(action.ReturnType)
                         && action.DeclaringType == controllerType)
                     .ToList()
                     .ForEach(action =>
@@ -59,9 +64,21 @@ namespace SIS.MvcFramework
                             path,
                             req =>
                             {
-                                Controller controller = (Controller) controllerInstances[controllerType];
+                                Controller controller = CreateController(controllerType);
 
                                 controller.Request = req;
+
+                                Principal controllerPrincipal = controller.User;
+
+                                AuthorizeAttribute controllerAuthAttr = controllerType.GetCustomAttribute<AuthorizeAttribute>();
+                                AuthorizeAttribute actionAuthAttr = action.GetCustomAttribute<AuthorizeAttribute>();
+
+                                if ((controllerAuthAttr != null && !controllerAuthAttr.IsAuthorized(controllerPrincipal))
+                                || (actionAuthAttr != null && !actionAuthAttr.IsAuthorized(controllerPrincipal)))
+                                {
+                                    return new RedirectResult(UnauthorizedRedirectUrl);
+                                }
+                                
                                 object[] actionParameterObjects = ActionParameterMapper.Instance.MapActionParameters(parametersByActionByControllerType[controllerType][action], req);
 
                                 return (IHttpResponse) action.Invoke(controller, actionParameterObjects);

@@ -3,15 +3,14 @@
 using SIS.HTTP.Common;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Headers;
-using SIS.HTTP.Responses;
 
 namespace SIS.MvcFramework.Results
 {
-    public class HtmlResult : HttpResponse
+    public class HtmlResult : ActionResult
     {
         public HtmlResult(
             string content,
-            HttpResponseStatusCode responseStatusCode)
+            HttpResponseStatusCode responseStatusCode = HttpResponseStatusCode.OK)
             : base(responseStatusCode)
         {
             HttpHeader contentTypeHeaderr =

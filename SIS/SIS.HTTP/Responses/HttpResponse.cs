@@ -34,8 +34,12 @@ namespace SIS.HTTP.Responses
 
         public byte[] Content { get; set; }
 
-        public void AddHeader(HttpHeader header) 
-            => this.Headers.AddHeader(header);
+        public void AddHeader(string key, string value)
+        {
+            HttpHeader header = new HttpHeader(key, value);
+
+            this.Headers.AddHeader(header);
+        }
 
         public byte[] GetBytes()
         {

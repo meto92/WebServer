@@ -12,7 +12,7 @@ namespace SIS.HTTP.Responses
 
         IHttpCookieCollection Cookies { get; }
 
-        void AddHeader(HttpHeader header);
+        void AddHeader(string key, string value);
 
         void AddCookie(HttpCookie cookie);
 

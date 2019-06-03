@@ -75,7 +75,7 @@ namespace SIS.MvcFramework
 
             byte[] content = File.ReadAllBytes(filePath);
 
-            IHttpResponse response = new InlineResourceResult(content, HttpResponseStatusCode.OK);
+            IHttpResponse response = new InlineResourceResult(content);
 
             return response;
         }

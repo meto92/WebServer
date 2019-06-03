@@ -2,26 +2,30 @@
 using System.Text;
 
 using IRunes.Models;
+using IRunes.Services;
 using IRunes.ViewModels;
 
-using SIS.HTTP.Responses;
+using SIS.MvcFramework;
 using SIS.MvcFramework.Attributes.Methods;
+using SIS.MvcFramework.Attributes.Security;
+using SIS.MvcFramework.Results;
 
 namespace IRunes.Controllers
 {
+    [Authorize]
     public class AlbumsController : Controller
     {
         private const int MinAlbumNameLength = 3;
         private const int MinAlbumCoverLength = 3;
 
-        public IHttpResponse All()
-        {
-            if (!IsLoggedIn())
-            {
-                return Redirect("/Users/Login");
-            }
+        private readonly IAlbumService albumService;
 
-            IEnumerable<Album> allAlbums = AlbumService.All();
+        public AlbumsController()
+            => this.albumService = new AlbumService();
+
+        public ActionResult All()
+        {
+            IEnumerable<Album> allAlbums = this.albumService.All();
 
             StringBuilder result = new StringBuilder();
 
@@ -39,19 +43,12 @@ namespace IRunes.Controllers
             return View();
         }
 
-        public IHttpResponse Create()
-            => IsLoggedIn()
-                ? View()
-                : Redirect("/Users/Login");
+        public ActionResult Create()
+            => View();
 
         [HttpPost(ActionName = nameof(Create))]
-        public IHttpResponse PostCreate(CreateAlbumViewModel model)
+        public ActionResult PostCreate(CreateAlbumViewModel model)
         {
-            if (!IsLoggedIn())
-            {
-                return Redirect("/Users/Login");
-            }
-
             if (model.Name.Length < MinAlbumNameLength
                 || model.Cover.Length < MinAlbumCoverLength)
             {
@@ -64,24 +61,19 @@ namespace IRunes.Controllers
                 Cover = model.Cover
             };
 
-            AlbumService.Add(album);
+            this.albumService.Add(album);
 
-            return Redirect("Albums/All");
+            return Redirect("/Albums/All");
         }
 
-        public IHttpResponse Details()
+        public ActionResult Details()
         {
-            if (!IsLoggedIn())
-            {
-                return Redirect("/Users/Login");
-            }
-
             if (!Request.QueryData.TryGetValue("id", out object id))
             {
                 return Redirect("/Albums/All");
             }
 
-            Album album = AlbumService.Find((string) id);
+            Album album = this.albumService.Find((string) id);
 
             if (album == null)
             {

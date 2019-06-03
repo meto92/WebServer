@@ -1,15 +1,16 @@
-﻿using SIS.HTTP.Responses;
+﻿using SIS.MvcFramework;
 using SIS.MvcFramework.Attributes.Methods;
+using SIS.MvcFramework.Results;
 
 namespace IRunes.Controllers
 {
     public class HomeController : Controller
     {
         [HttpGet(Path = "/")]
-        public IHttpResponse IndexSlash()
+        public ActionResult IndexSlash()
             => Index();
 
-        public IHttpResponse Index()
+        public ActionResult Index()
         {
             string username = GetUsername();
 

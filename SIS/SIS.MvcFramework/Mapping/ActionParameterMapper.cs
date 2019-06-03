@@ -5,7 +5,7 @@ using System.Reflection;
 
 using SIS.HTTP.Requests;
 
-namespace SIS.MvcFramework
+namespace SIS.MvcFramework.Mapping
 {
     public class ActionParameterMapper
     {

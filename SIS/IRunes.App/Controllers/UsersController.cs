@@ -1,9 +1,10 @@
 ﻿using IRunes.Models;
+using IRunes.Services;
 using IRunes.ViewModels;
 
-using SIS.HTTP.Cookies;
-using SIS.HTTP.Responses;
+using SIS.MvcFramework;
 using SIS.MvcFramework.Attributes.Methods;
+using SIS.MvcFramework.Results;
 
 namespace IRunes.Controllers
 {
@@ -12,14 +13,23 @@ namespace IRunes.Controllers
         private const int MinUsernameLength = 3;
         private const int MinPasswordLength = 4;
 
-        public IHttpResponse Login()
+        private readonly IUserService userService;
+        private readonly IHashService hashService;
+
+        public UsersController()
         {
-            Request.Session.ClearParameters();
+            this.userService = new UserService();
+            this.hashService = new HashService();
+        }
+
+        public ActionResult Login()
+        {
+            SignOut();
 
             return View();
         }
 
-        private IHttpResponse ValidateUsernameAndPassword(string username, string password)
+        private ActionResult ValidateUsernameAndPassword(string username, string password)
         {
             if (username.Length < MinUsernameLength)
             {
@@ -35,18 +45,18 @@ namespace IRunes.Controllers
         }
 
         [HttpPost(ActionName = nameof(Login))]
-        public IHttpResponse PostLogin(LoginUserViewModel model)
+        public ActionResult PostLogin(LoginUserViewModel model)
         {
             model.UsernameOrEmail = model.UsernameOrEmail.Trim();
 
-            IHttpResponse responseForValidation = this.ValidateUsernameAndPassword(model.UsernameOrEmail, model.Password);
+            ActionResult responseForValidation = this.ValidateUsernameAndPassword(model.UsernameOrEmail, model.Password);
 
             if (responseForValidation != null)
             {
                 return responseForValidation;
             }
 
-            User user = base.UserService.Get(model.UsernameOrEmail, base.HashService.Hash(model.Password));
+            User user = this.userService.Get(model.UsernameOrEmail, this.hashService.Hash(model.Password));
 
             if (user == null)
             {
@@ -56,7 +66,9 @@ namespace IRunes.Controllers
             Request.Session.ClearParameters();
             Request.Session.AddParameter("username", user.Username);
 
-            IHttpResponse response = base.Redirect("/");
+            SignIn(user.Id, user.Username, user.Email);
+
+            ActionResult response = base.Redirect("/");
 
             //HttpCookie authCookie = new HttpCookie(UserAuthCookieKey, UserCookieService.GetEncryptedUsername(model.UsernameOrEmail));
 
@@ -65,7 +77,7 @@ namespace IRunes.Controllers
             return response;
         }
 
-        public IHttpResponse Register()
+        public ActionResult Register()
         {
             if (IsLoggedIn())
             {
@@ -76,11 +88,11 @@ namespace IRunes.Controllers
         }
 
         [HttpPost(ActionName = nameof(Register))]
-        public IHttpResponse PostRegister(RegisterUserViewModel model)
+        public ActionResult PostRegister(RegisterUserViewModel model)
         {
             model.Username = model.Username.Trim();
             
-            IHttpResponse responseForValidation = this.ValidateUsernameAndPassword(model.Username, model.Password);
+            ActionResult responseForValidation = this.ValidateUsernameAndPassword(model.Username, model.Password);
 
             if (responseForValidation != null)
             {
@@ -93,14 +105,14 @@ namespace IRunes.Controllers
                 return Redirect("/Users/Register");
             }
 
-            bool exists = base.UserService.Exists(model.Username);
+            bool exists = this.userService.Exists(model.Username);
 
             if (exists)
             {
                 return base.BadRequestError("Username already taken.");
             }
 
-            bool created = base.UserService.Create(model.Username, base.HashService.Hash(model.Password), model.Email);
+            bool created = this.userService.Create(model.Username, this.hashService.Hash(model.Password), model.Email);
 
             if (!created)
             {
@@ -110,21 +122,11 @@ namespace IRunes.Controllers
             return base.Redirect("/Users/Login");
         }
 
-        public IHttpResponse Logout()
+        public ActionResult Logout()
         {
-            IHttpResponse response = base.Redirect("/");
+            SignOut();
 
-            //HttpCookie authCookie = req.Cookies.GetCookie(UserAuthCookieKey);
-
-            //if (authCookie != null)
-            //{
-            //    authCookie.Delete();
-            //    response.AddCookie(authCookie);
-            //}
-
-            Request.Session.ClearParameters();
-
-            return response;
+            return Redirect("/");
         }
     }
 }

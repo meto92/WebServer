@@ -3,11 +3,10 @@
 using SIS.HTTP.Common;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Headers;
-using SIS.HTTP.Responses;
 
 namespace SIS.MvcFramework.Results
 {
-    public class TextResult : HttpResponse
+    public class TextResult : ActionResult
     {
         public TextResult(
             string content,

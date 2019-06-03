@@ -13,6 +13,9 @@ namespace SIS.HTTP.Headers
         public const string SetCookie = "Set-Cookie";
         public const string ContentLength = "Content-Length";
         public const string ContentDisposition = "Content-Disposition";
+        public const string ContentApplicationJson = "application/json";
+        public const string ContentApplicationXml = "application/xml";
+        public const string ContentAttachment = "attachment";
 
         public HttpHeader(string key, string value)
         {

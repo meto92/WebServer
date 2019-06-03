@@ -10,6 +10,6 @@ namespace IRunes.Services
 
         Album Find(string id);
 
-        void Add(Album album);
+        bool Add(Album album);
     }
 }

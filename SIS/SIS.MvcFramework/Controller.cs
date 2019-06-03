@@ -6,6 +6,8 @@ using SIS.MvcFramework.Results;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
+using SIS.MvcFramework.Extensions;
+using SIS.MvcFramework.Identity;
 
 namespace SIS.MvcFramework
 {
@@ -20,12 +22,30 @@ namespace SIS.MvcFramework
 
         protected Controller()
         {
-            this.ViewData = new Dictionary<string, string>();
+            this.ViewData = new Dictionary<string, string>();            
         }
 
         public IHttpRequest Request { get; set; }
 
         protected Dictionary<string, string> ViewData { get; }
+
+        public Principal User
+            => this.Request.Session.GetParameter<Principal>("principal");
+
+        protected void SignIn(string id, string username, string email)
+        {
+            Principal user = new Principal
+            {
+                Id = id,
+                Username = username,
+                Email = email
+            };
+
+            this.Request.Session.AddParameter("principal", user);
+        }
+
+        protected void SignOut()
+            => this.Request.Session.ClearParameters();
 
         private void SetPlaceholdersContent(ref string html)
         {
@@ -38,9 +58,9 @@ namespace SIS.MvcFramework
         }
 
         private string GetFileContent(string filePath)
-            => File.ReadAllText(filePath);
+            => System.IO.File.ReadAllText(filePath);
 
-        protected IHttpResponse View(string htmlFilePath, bool loggedIn = true, HttpResponseStatusCode httpResponseStatusCode = HttpResponseStatusCode.OK)
+        protected ActionResult View(string htmlFilePath, bool loggedIn = true, HttpResponseStatusCode httpResponseStatusCode = HttpResponseStatusCode.OK)
         {
             string layout = this.GetFileContent(LayoutPath);
             string content = this.GetFileContent($"{AppDir}views/{htmlFilePath}.html");
@@ -55,7 +75,7 @@ namespace SIS.MvcFramework
             return new HtmlResult(html, httpResponseStatusCode);
         }
 
-        protected IHttpResponse View([CallerMemberName]string action = "")
+        protected ActionResult View([CallerMemberName]string action = "")
         {
             string fullControllerName = this.GetType().Name;
             string controllerName = fullControllerName.Substring(0, fullControllerName.Length - nameof(Controller).Length);
@@ -63,12 +83,12 @@ namespace SIS.MvcFramework
             return View($"{controllerName}/{action}", this.IsLoggedIn());
         }
 
-        protected IHttpResponse BadRequestError(string errorMessage)
+        protected ActionResult BadRequestError(string errorMessage)
             => new HtmlResult(
                 $"<h1>{errorMessage}</h1>",
                 HttpResponseStatusCode.BadRequest);
 
-        protected IHttpResponse ServerError(string errorMessage)
+        protected ActionResult ServerError(string errorMessage)
             => new HtmlResult(
                 $"<h1>{errorMessage}</h1>",
                 HttpResponseStatusCode.InternalServerError);
@@ -79,9 +99,21 @@ namespace SIS.MvcFramework
                 .GetParameter<string>("username");
 
         protected bool IsLoggedIn()
-            => this.GetUsername() != null;
+            => this.User != null;
 
-        protected IHttpResponse Redirect(string location)
+        protected ActionResult Redirect(string location)
             => new RedirectResult(location);
+
+        protected ActionResult Xml(object obj)
+            => new XmlResult(obj.ToXml());
+
+        protected ActionResult Json(object obj)
+            => new JsonResult(obj.ToJson());
+
+        protected ActionResult File(byte[] fileContent)
+            => new FileResult(fileContent);
+
+        protected ActionResult NotFound(string message)
+            => new NotFoundResult(message);
     }
 }

@@ -12,13 +12,15 @@ namespace IRunes.Services
     {
         private readonly RunesDbContext db;
 
-        public AlbumService(RunesDbContext db)
-            => this.db = db;
+        public AlbumService()
+            => this.db = new RunesDbContext();
 
-        public void Add(Album album)
+        public bool Add(Album album)
         {
             this.db.Albums.Add(album);
             this.db.SaveChanges();
+
+            return true;
         }
 
         public IEnumerable<Album> All()

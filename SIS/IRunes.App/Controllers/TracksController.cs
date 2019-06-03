@@ -1,10 +1,13 @@
 ﻿using System.Linq;
 
 using IRunes.Models;
+using IRunes.Services;
 using IRunes.ViewModels;
 
-using SIS.HTTP.Responses;
+using SIS.MvcFramework;
 using SIS.MvcFramework.Attributes.Methods;
+using SIS.MvcFramework.Attributes.Security;
+using SIS.MvcFramework.Results;
 
 namespace IRunes.Controllers
 {
@@ -13,13 +16,18 @@ namespace IRunes.Controllers
         private const int MinTrackNameLength = 3;
         private const int MinTrackLinkLength = 7;
 
-        public IHttpResponse Create()
-        {
-            if (!IsLoggedIn())
-            {
-                return Redirect("/Users/Login");
-            }
+        private readonly ITrackService trackService;
+        private readonly IAlbumService albumService;
 
+        public TracksController()
+        {
+            this.trackService = new TrackService();
+            this.albumService = new AlbumService();
+        }
+
+        [Authorize]
+        public ActionResult Create()
+        {
             if (!Request.QueryData.TryGetValue("albumId", out object albumId))
             {
                 return Redirect("/Albums/All");
@@ -30,20 +38,16 @@ namespace IRunes.Controllers
             return View();
         }
 
+        [Authorize]
         [HttpPost(ActionName = nameof(Create))]
-        public IHttpResponse PostCreate(CreateTrackViewModel model)
+        public ActionResult PostCreate(CreateTrackViewModel model)
         {
-            if (!IsLoggedIn())
-            {
-                return Redirect("/Users/Login");
-            }
-
             if (!Request.QueryData.TryGetValue("albumId", out object albumId))
             {
                 return Redirect("/Albums/All");
             }
 
-            Album album = AlbumService.Find((string) albumId);
+            Album album = this.albumService.Find((string) albumId);
 
             if (album == null)
             {
@@ -66,25 +70,21 @@ namespace IRunes.Controllers
                 Album = album
             };
 
-            TrackService.Add(track);
+            this.trackService.Add(track);
 
             return Redirect("/");
         }
 
-        public IHttpResponse Details()
+        [Authorize]
+        public ActionResult Details()
         {
-            if (!IsLoggedIn())
-            {
-                return Redirect("/Users/Login");
-            }
-
             if (!Request.QueryData.TryGetValue("albumId", out object albumId)
                 || !Request.QueryData.TryGetValue("trackId", out object trackId))
             {
                 return Redirect("/Albums/All");
             }
 
-            Album album = AlbumService.Find((string) albumId);
+            Album album = this.albumService.Find((string) albumId);
             Track track = album?.Tracks.FirstOrDefault(t => t.Id == (string) trackId);
 
             if (album == null || track == null)

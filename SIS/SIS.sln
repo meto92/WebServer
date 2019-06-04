@@ -9,15 +9,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SIS.MvcFramework", "SIS.Mvc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{A4973DBB-D0A5-4AD8-B9BC-ABA052D3BD90}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IRunes", "IRunes", "{7A4A0104-D599-471D-B0BA-C84CE0F1A37E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IRunes", "Apps\IRunes", "{7A4A0104-D599-471D-B0BA-C84CE0F1A37E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.App", "IRunes.App\IRunes.App.csproj", "{3BC57DF3-AADE-4B2F-8DC7-AC84BB925910}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.App", "Apps\IRunes\IRunes.App\IRunes.App.csproj", "{3BC57DF3-AADE-4B2F-8DC7-AC84BB925910}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Data", "IRunes.Data\IRunes.Data.csproj", "{897A776E-1448-4149-84C3-4D3A38BE1871}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Data", "Apps\IRunes\IRunes.Data\IRunes.Data.csproj", "{897A776E-1448-4149-84C3-4D3A38BE1871}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Models", "IRunes.Models\IRunes.Models.csproj", "{2FF0155E-B709-4C20-BB87-045B5D699CDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Models", "Apps\IRunes\IRunes.Models\IRunes.Models.csproj", "{2FF0155E-B709-4C20-BB87-045B5D699CDF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Services", "IRunes.Services\IRunes.Services.csproj", "{C8BC9FF6-ABF8-45C9-8296-4392CCA3A381}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IRunes.Services", "Apps\IRunes\IRunes.Services\IRunes.Services.csproj", "{C8BC9FF6-ABF8-45C9-8296-4392CCA3A381}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIS.MvcFramework.Tests", "SIS.MvcFramework.Tests\SIS.MvcFramework.Tests.csproj", "{63C2171F-DB5E-480A-9D45-980B1742D7EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{C8BC9FF6-ABF8-45C9-8296-4392CCA3A381}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8BC9FF6-ABF8-45C9-8296-4392CCA3A381}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8BC9FF6-ABF8-45C9-8296-4392CCA3A381}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63C2171F-DB5E-480A-9D45-980B1742D7EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63C2171F-DB5E-480A-9D45-980B1742D7EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63C2171F-DB5E-480A-9D45-980B1742D7EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63C2171F-DB5E-480A-9D45-980B1742D7EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

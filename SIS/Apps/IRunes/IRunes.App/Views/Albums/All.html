@@ -1,0 +1,23 @@
+﻿<h1>Albums</h1>
+
+<hr class="bg-success" />
+
+<a href="/Albums/Create" class="btn btn-success">Create Album</a>
+
+<hr class="bg-success" />
+
+<div class="mb-4 pb-2">
+    @if (Model.AllAlbums.Count() == 0)
+    {
+        There are currently no albums.
+    }
+    @else
+    {
+        @foreach (AlbumViewModel album in Model.AllAlbums)
+        {
+            <a href="/Albums/Details?id=@album.Id" class="d-block">
+                <strong>@album.Name</strong>
+            </a>
+        }
+    }
+</div>

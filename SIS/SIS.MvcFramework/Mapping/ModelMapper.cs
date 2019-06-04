@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 
 namespace SIS.MvcFramework.Mapping
@@ -39,10 +40,10 @@ namespace SIS.MvcFramework.Mapping
         private static object MapObject(object origin, Type destinationType)
         {
             object destinationInstance = Activator.CreateInstance(destinationType);
-            
+
             foreach (PropertyInfo originProperty in origin.GetType().GetProperties())
             {
-                PropertyInfo destinationProperty = destinationType.GetType()
+                PropertyInfo destinationProperty = destinationInstance.GetType()
                     .GetProperty(originProperty.Name);
 
                 if (destinationProperty != null)

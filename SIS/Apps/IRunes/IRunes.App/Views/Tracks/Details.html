@@ -1,0 +1,17 @@
+﻿<div class="mx-auto text-center col-md-6">
+    { string formattedPrice = $"{Model.Price:f2}"; }
+    <h5>Name: @Model.Name</h5>
+    <h5>Price: $@formattedPrice</h5>
+
+    <hr style="height: 1px" class="bg-success" />
+
+    <div class="row">
+        <div class="col-md-12">
+            <iframe src="@Model.Link"></iframe>
+        </div>
+    </div>
+
+    <hr style="height: 1px" class="bg-success" />
+
+    <a href="/Albums/Details?id=@Model.AlbumId" class="btn btn-sm btn-success">Back To Album</a>
+</div>

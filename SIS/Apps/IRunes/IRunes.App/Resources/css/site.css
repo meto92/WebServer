@@ -1,0 +1,10 @@
+﻿hr {
+    height: 2px;
+    background: #fff;
+}
+
+iframe {
+    width: 100%;
+    min-height: 250px;
+    height: auto;
+}

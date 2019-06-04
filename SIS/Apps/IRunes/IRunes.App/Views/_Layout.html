@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <link href="/Resources/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Resources/css/site.css" rel="stylesheet" />
+    <title>IRunes</title>
+</head>
+<body>
+    <div class="container-fluid">
+        <header class="bg-success text-white container-fluid">
+            <p class="title d-inline-block">IRunes</p>
+
+            @RenderNav()
+        </header>
+
+        <hr class="bg-success" />
+
+        @RenderBody()
+
+        <hr class="bg-success" />
+
+        <footer class="text-center">
+            <p><b>CopyRight &copy; Sanity Design Studios. All rights reserved.</b></p>
+        </footer>
+    </div>
+
+    <script src="/Resources/js/jquery-3.4.1.min.js"></script>
+    <script src="/Resources/js/popper.min.js"></script>
+    <script src="/Resources/js/bootstrap.min.js"></script>
+</body>
+</html>

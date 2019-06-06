@@ -10,8 +10,8 @@ namespace IRunes.Services
     {
         private readonly RunesDbContext db;
 
-        public UserService()
-            => this.db = new RunesDbContext();
+        public UserService(RunesDbContext db)
+            => this.db = db;
 
         public bool Create(string username, string password, string email)
         {

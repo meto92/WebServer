@@ -17,10 +17,10 @@ namespace IRunes.App.Controllers
         private readonly IUserService userService;
         private readonly IHashService hashService;
 
-        public UsersController()
+        public UsersController(IUserService userService, IHashService hashService)
         {
-            this.userService = new UserService();
-            this.hashService = new HashService();
+            this.userService = userService;
+            this.hashService = hashService;
         }
 
         public ActionResult Login()

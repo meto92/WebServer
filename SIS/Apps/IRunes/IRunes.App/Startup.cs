@@ -1,8 +1,9 @@
 ﻿using IRunes.Data;
-
+using IRunes.Services;
 using Microsoft.EntityFrameworkCore;
 
 using SIS.MvcFramework;
+using SIS.MvcFramework.DependencyContainer;
 
 namespace IRunes.App
 {
@@ -21,9 +22,12 @@ namespace IRunes.App
             //MigrateDatabase();
         }
 
-        public void ConfigureServices()
+        public void ConfigureServices(IServiceProvider serviceProvider)
         {
-
+            serviceProvider.Add<IAlbumService, AlbumService>();
+            serviceProvider.Add<IHashService, HashService>();
+            serviceProvider.Add<ITrackService, TrackService>();
+            serviceProvider.Add<IUserService, UserService>();
         }
     }
 }

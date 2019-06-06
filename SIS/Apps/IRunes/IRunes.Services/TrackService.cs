@@ -7,8 +7,8 @@ namespace IRunes.Services
     {
         private readonly RunesDbContext db;
 
-        public TrackService()
-            => this.db = new RunesDbContext();
+        public TrackService(RunesDbContext db)
+            => this.db = db;
 
         public void Add(Track track)
         {

@@ -1,9 +1,11 @@
-﻿namespace SIS.MvcFramework
+﻿using SIS.MvcFramework.DependencyContainer;
+
+namespace SIS.MvcFramework
 {
     public interface IMvcApplication
     {
         void Configure();
 
-        void ConfigureServices();
+        void ConfigureServices(IServiceProvider serviceProvider);
     }
 }

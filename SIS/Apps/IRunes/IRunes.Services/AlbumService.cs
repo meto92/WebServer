@@ -12,8 +12,8 @@ namespace IRunes.Services
     {
         private readonly RunesDbContext db;
 
-        public AlbumService()
-            => this.db = new RunesDbContext();
+        public AlbumService(RunesDbContext db)
+            => this.db = db;
 
         public bool Add(Album album)
         {

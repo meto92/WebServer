@@ -20,8 +20,8 @@ namespace IRunes.App.Controllers
 
         private readonly IAlbumService albumService;
 
-        public AlbumsController()
-            => this.albumService = new AlbumService();
+        public AlbumsController(IAlbumService albumService)
+            => this.albumService = albumService;
 
         public ActionResult All()
         {

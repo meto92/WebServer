@@ -8,11 +8,15 @@ using SIS.HTTP.Responses;
 using SIS.MvcFramework.Attributes.Action;
 using SIS.MvcFramework.Attributes.Methods;
 using SIS.MvcFramework.Attributes.Security;
+using SIS.MvcFramework.DependencyContainer;
 using SIS.MvcFramework.Identity;
+using SIS.MvcFramework.Logging;
 using SIS.MvcFramework.Mapping;
 using SIS.MvcFramework.Results;
 using SIS.MvcFramework.Routing;
 using SIS.MvcFramework.Sessions;
+
+using IServiceProvider = SIS.MvcFramework.DependencyContainer.IServiceProvider;
 
 namespace SIS.MvcFramework
 {
@@ -27,12 +31,12 @@ namespace SIS.MvcFramework
             parametersByActionByControllerType = new Dictionary<Type, Dictionary<MethodInfo, ParameterInfo[]>>();
         }
 
-        private static Controller CreateController(Type controllerType)
+        private static Controller CreateController(Type controllerType, IServiceProvider serviceProvider)
         {
-            return (Controller) Activator.CreateInstance(controllerType);
+            return (Controller) serviceProvider.CreateInstance(controllerType);
         }
 
-        private static void AutoRegisterRoutes(IMvcApplication app, IServerRoutingTable serverRoutingTable)
+        private static void AutoRegisterRoutes(IMvcApplication app, IServerRoutingTable serverRoutingTable, IServiceProvider serviceProvider)
         {
             Type[] controllerTypes = app.GetType().Assembly
                 .GetTypes()
@@ -65,7 +69,7 @@ namespace SIS.MvcFramework
                             path,
                             req =>
                             {
-                                Controller controller = CreateController(controllerType);
+                                Controller controller = CreateController(controllerType, serviceProvider);
 
                                 controller.Request = req;
 
@@ -90,13 +94,16 @@ namespace SIS.MvcFramework
 
         public static void Start(IMvcApplication app)
         {
+            IServiceProvider serviceProvider = new ServiceProvider();
             IServerRoutingTable serverRoutingTable = new ServerRoutingTable();
             IHttpSessionStorage httpSessionStorage = new HttpSessionStorage();
 
-            app.ConfigureServices();
+            serviceProvider.Add<ILogger, ConsoleLogger>();
+
+            app.ConfigureServices(serviceProvider);
             app.Configure();
 
-            AutoRegisterRoutes(app, serverRoutingTable);
+            AutoRegisterRoutes(app, serverRoutingTable, serviceProvider);
 
             new Server(80, serverRoutingTable, httpSessionStorage).Run();
         }

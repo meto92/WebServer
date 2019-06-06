@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+
 using IRunes.App.ViewModels;
 using IRunes.Models;
 using IRunes.Services;
@@ -11,6 +12,7 @@ using SIS.MvcFramework.Results;
 
 namespace IRunes.App.Controllers
 {
+    //[Authorize]
     public class TracksController : Controller
     {
         private const int MinTrackNameLength = 3;
@@ -19,13 +21,12 @@ namespace IRunes.App.Controllers
         private readonly ITrackService trackService;
         private readonly IAlbumService albumService;
 
-        public TracksController()
+        public TracksController(ITrackService trackService, IAlbumService albumService)
         {
-            this.trackService = new TrackService();
-            this.albumService = new AlbumService();
+            this.trackService = trackService;
+            this.albumService = albumService;
         }
 
-        [Authorize]
         public ActionResult Create(string albumId)
         {
             if (albumId == null)
@@ -39,7 +40,6 @@ namespace IRunes.App.Controllers
             });
         }
 
-        [Authorize]
         [HttpPost(ActionName = nameof(Create))]
         public ActionResult PostCreate(TrackCreateViewModel model, string albumId)
         {
@@ -76,7 +76,6 @@ namespace IRunes.App.Controllers
             return Redirect("/");
         }
 
-        [Authorize]
         public ActionResult Details(string albumId, string trackId)
         {
             if (albumId == null || trackId == null)

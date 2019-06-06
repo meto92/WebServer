@@ -1,6 +1,6 @@
 ﻿namespace IRunes.App.ViewModels
 {
-    public class LoginUserViewModel
+    public class UserLoginViewModel
     {
         public string UsernameOrEmail { get; set; }
 

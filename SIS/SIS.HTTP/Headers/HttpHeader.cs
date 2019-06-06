@@ -1,4 +1,4 @@
-﻿using SIS.HTTP.Common;
+﻿using SIS.Common;
 
 namespace SIS.HTTP.Headers
 {
@@ -19,8 +19,8 @@ namespace SIS.HTTP.Headers
 
         public HttpHeader(string key, string value)
         {
-            CoreValidator.ThrowIfNullOrEmpty(key, nameof(key));
-            CoreValidator.ThrowIfNullOrEmpty(value, nameof(value));
+            key.ThrowIfNullOrEmpty(nameof(key));
+            value.ThrowIfNullOrEmpty(nameof(value));
 
             this.Key = key;
             this.Value = value;

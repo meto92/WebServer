@@ -1,7 +1,6 @@
 ﻿<div class="mx-auto text-center col-md-6">
-    { string formattedPrice = $"{Model.Price:f2}"; }
     <h5>Name: @Model.Name</h5>
-    <h5>Price: $@formattedPrice</h5>
+    <h5>Price: $@($"{Model.Price:f2}")</h5>
 
     <hr style="height: 1px" class="bg-success" />
 

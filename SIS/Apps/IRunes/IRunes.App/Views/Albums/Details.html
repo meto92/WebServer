@@ -1,9 +1,8 @@
 ﻿<div class="row mb-4">
     <div class="col-md-4">
-        {string formattedPrice = $"{Model.Price:f2}";}
         <img src="@Model.Cover" alt="Album cover" class="img-fluid" />
         <h5 class="text-center mt-4"><b>Album Name: @Model.Name</b></h5>
-        <h5 class="text-center"><b>Album Price: $@formattedPrice</b></h5>
+        <h5 class="text-center"><b>Album Price: $@($"{Model.Price:f2}")</b></h5>
         
         <div class="d-flex justify-content-between">
             <a href="/Tracks/Create?albumId=@Model.Id" class="btn btn-sm btn-success">Create Track</a>
@@ -18,11 +17,10 @@
         <p>Tracks</p>
         <ul>
             {int truckNumber = 0;}
+
             @foreach (TrackViewModel track in Model.Tracks)
             {
-                {string formattedTruckNumber = $"{++truckNumber}.";}
-                
-                <li>@formattedTruckNumber <a href="/Tracks/Details?albumId=@Model.Id &trackId=@track.Id"><em>@track.Name</em></a></li>
+                <li>@($"{++truckNumber}.") <a href="/Tracks/Details?albumId=@(Model.Id)&trackId=@track.Id"><em>@track.Name</em></a></li>
             }
         </ul>
     </div>

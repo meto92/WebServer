@@ -33,8 +33,6 @@ namespace IRunes.App.Controllers
                 return Redirect("/Albums/All");
             }
 
-            ViewData["albumId"] = albumId;
-
             return View(new AlbumViewModel
             {
                 Id = albumId
@@ -43,7 +41,7 @@ namespace IRunes.App.Controllers
 
         [Authorize]
         [HttpPost(ActionName = nameof(Create))]
-        public ActionResult PostCreate(CreateTrackViewModel model, string albumId)
+        public ActionResult PostCreate(TrackCreateViewModel model, string albumId)
         {
             if (albumId == null)
             {

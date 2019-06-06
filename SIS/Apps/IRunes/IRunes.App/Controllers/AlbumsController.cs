@@ -39,7 +39,7 @@ namespace IRunes.App.Controllers
             => View();
 
         [HttpPost(ActionName = nameof(Create))]
-        public ActionResult PostCreate(CreateAlbumViewModel model)
+        public ActionResult PostCreate(AlbumCreateViewModel model)
         {
             if (model.Name.Length < MinAlbumNameLength
                 || model.Cover.Length < MinAlbumCoverLength)

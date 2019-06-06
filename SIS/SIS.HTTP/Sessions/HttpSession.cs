@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using SIS.HTTP.Common;
+using SIS.Common;
 
 namespace SIS.HTTP.Sessions
 {
@@ -19,8 +19,8 @@ namespace SIS.HTTP.Sessions
 
         public void AddParameter(string name, object parameter)
         {
-            CoreValidator.ThrowIfNullOrEmpty(name, nameof(name));
-            CoreValidator.ThrowIfNull(parameter, nameof(parameter));
+            name.ThrowIfNullOrEmpty(nameof(name));
+            parameter.ThrowIfNull(nameof(parameter));
 
             this.parameters[name] = parameter;
         }
@@ -32,7 +32,7 @@ namespace SIS.HTTP.Sessions
 
         public object GetParameter(string name)
         {
-            CoreValidator.ThrowIfNullOrEmpty(name, nameof(name));
+            name.ThrowIfNullOrEmpty(nameof(name));
 
             return this.parameters.TryGetValue(name, out object obj)
                 ? obj

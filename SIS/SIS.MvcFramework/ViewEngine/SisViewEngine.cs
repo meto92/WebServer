@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,17 +9,21 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
+using SIS.MvcFramework.Identity;
 
 namespace SIS.MvcFramework.ViewEngine
 {
     public class SisViewEngine : IViewEngine
     {
+        private const string InvalidExpressionMessage = "Insufficient expression parentheses count: {0}";
+
         private IView CompileAndInstance(string code, Assembly modelAssembly)
         {
             var compilation = CSharpCompilation.Create("AppViewAssembly")
                 .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(IView).Assembly.Location))
+                .AddReferences(MetadataReference.CreateFromFile(Assembly.GetEntryAssembly().Location))
                 .AddReferences(MetadataReference.CreateFromFile(modelAssembly.Location));
 
             AssemblyName[] netStandardAssemblyNames = Assembly.Load(new AssemblyName("netstandard")).GetReferencedAssemblies();
@@ -66,6 +71,73 @@ namespace SIS.MvcFramework.ViewEngine
             }
         }
 
+        private void HandleCSharpExpressions(string line, StringBuilder csharpCode)
+        {
+            string csharpStringToAppend = "html.AppendLine(@\"";
+            string restOfLine = line;
+
+            while (restOfLine.Contains("@"))
+            {
+                int atSignIndex = restOfLine.IndexOf("@");
+                string plainText = restOfLine.Substring(0, atSignIndex)
+                    .Replace("\"", "\"\"");
+                Match match = Regex.Match(restOfLine.Substring(atSignIndex), @"^@\s*\(.+\s*\)");
+                
+                if (match.Success)
+                {
+                    int count = 1;
+                    int openingBracketIndex = restOfLine.IndexOf("(", atSignIndex + 1);
+                    int closingBracketIndex = openingBracketIndex;
+
+                    while (count > 0 && closingBracketIndex < restOfLine.Length - 1)
+                    {
+                        closingBracketIndex++;
+
+                        if (restOfLine[closingBracketIndex] == '(')
+                        {
+                            count++;
+                        }
+                        else if (restOfLine[closingBracketIndex] == ')')
+                        {
+                            count--;
+                        }
+                    }
+
+                    string expression = restOfLine.Substring(openingBracketIndex + 1, closingBracketIndex - openingBracketIndex - 1);
+
+                    if (count > 0)
+                    {
+                        throw new InvalidOperationException(string.Format(
+                            InvalidExpressionMessage,
+                            expression));
+                    }
+
+                    csharpStringToAppend += plainText + "\" + " + expression + " + @\"";
+
+                    restOfLine = restOfLine.Substring(closingBracketIndex + 1);
+
+                    continue;
+                }
+
+                Regex csharpCodeRegex = new Regex(@"[^\s<""]+");
+                string csharpExpression = csharpCodeRegex.Match(restOfLine.Substring(atSignIndex + 1))?.Value;
+
+                csharpStringToAppend += plainText + "\" + " + csharpExpression + " + @\"";
+
+                if (restOfLine.Length <= atSignIndex + csharpExpression.Length + 1)
+                {
+                    restOfLine = string.Empty;
+                }
+                else
+                {
+                    restOfLine = restOfLine.Substring(atSignIndex + csharpExpression.Length + 1);
+                }
+            }
+
+            csharpStringToAppend += $"{restOfLine.Replace("\"", "\"\"")}\");";
+            csharpCode.AppendLine(csharpStringToAppend);
+        }
+
         private string GetCSharpCode(string viewContent)
         {
             string[] lines = viewContent.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -109,47 +181,44 @@ namespace SIS.MvcFramework.ViewEngine
 
                         csharpCode.AppendLine(csharpLine);
                     }
+                    else if (line.Contains("@Render"))
+                    {
+                        csharpCode.AppendLine($"html.AppendLine(@\"{line}\");");
+                    }
                     else
                     {
-                        string csharpStringToAppend = "html.AppendLine(@\"";
-                        string restOfLine = line;
-
-                        while (restOfLine.Contains("@"))
-                        {
-                            int atSignIndex = restOfLine.IndexOf("@");
-                            string plainText = restOfLine.Substring(0, atSignIndex)
-                                .Replace("\"", "\"\"");
-
-                            Regex csharpCodeRegex = new Regex(@"[^\s<""]+");
-                            string csharpExpression = csharpCodeRegex.Match(restOfLine.Substring(atSignIndex + 1))?.Value;
-
-                            csharpStringToAppend += plainText + "\" + " + csharpExpression + " + @\"";
-
-                            if (restOfLine.Length <= atSignIndex + csharpExpression.Length + 1)
-                            {
-                                restOfLine = string.Empty;
-                            }
-                            else
-                            {
-                                restOfLine = restOfLine.Substring(atSignIndex + csharpExpression.Length + 1);
-                            }
-                        }
-
-                        csharpStringToAppend += $"{restOfLine.Replace("\"", "\"\"")}\");";
-                        //csharpStringToAppend += $"{restOfLine}\");";
-                        csharpCode.AppendLine(csharpStringToAppend);
+                        HandleCSharpExpressions(line, csharpCode);
                     }
                 }
             }
-
+            
              return csharpCode.ToString();
         }
 
-        public string GetHtml<T>(string viewContent, T model)
+        public string GetHtml<T>(string viewContent, T model, Principal user = null)
         {
+            Type modelType = model?.GetType() ?? typeof(T);
+            string modelTypeName = modelType.Name;
+
             if (model == null)
             {
                 model = (T) new object();
+            }
+            else if (typeof(IEnumerable).IsAssignableFrom(model.GetType()))
+            {
+                // simple array
+                if (modelType.IsArray)
+                {
+                    string arrayType = modelTypeName.Substring(0, modelTypeName.IndexOf("["));
+
+                    modelTypeName = $"{arrayType}[]";
+                }
+                else
+                {
+                    string name = modelTypeName.Substring(0, modelTypeName.IndexOf("`"));
+
+                    modelTypeName = $"{name}<" + modelType.GetGenericArguments()[0] + ">";
+                }
             }
 
             string csharpHtmlCode = GetCSharpCode(viewContent);
@@ -159,6 +228,7 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 
+using SIS.MvcFramework.Identity;
 using SIS.MvcFramework.ViewEngine;
 
 using {model.GetType().Namespace};
@@ -167,10 +237,10 @@ namespace AppViewCodeNamespace
 {{
     public class AppViewCode : IView
     {{
-        //public string GetHtml<{model.GetType().Name}>({model.GetType().Name} Model)
-        public string GetHtml(object model)
+        public string GetHtml(object model, Principal user)
         {{
-            {model.GetType().Name} Model = ({model.GetType().Name}) model;
+            {modelTypeName} Model = ({modelTypeName}) model;
+            Principal User = user;
 
             StringBuilder html = new StringBuilder();
 
@@ -182,8 +252,8 @@ namespace AppViewCodeNamespace
 }}";
 
             IView view = CompileAndInstance(code, model.GetType().Assembly);
-
-            string htmlResult = view?.GetHtml(model);
+            
+            string htmlResult = view?.GetHtml(model, user);
 
             return htmlResult;
         }        

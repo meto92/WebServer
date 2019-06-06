@@ -1,5 +1,6 @@
 ﻿using System;
-using SIS.HTTP.Common;
+
+using SIS.Common;
 
 namespace SIS.HTTP.Cookies
 {
@@ -15,8 +16,8 @@ namespace SIS.HTTP.Cookies
             string path = DefaultPath,
             bool httpOnly = true)
         {
-            CoreValidator.ThrowIfNullOrEmpty(key, nameof(key));
-            CoreValidator.ThrowIfNullOrEmpty(value, nameof(value));
+            key.ThrowIfNullOrEmpty(nameof(key));
+            value.ThrowIfNullOrEmpty(nameof(value));
 
             this.Key = key;
             this.Value = value;

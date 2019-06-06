@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 using SIS.MvcFramework.Results;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Requests;
-using SIS.HTTP.Responses;
+
 using SIS.MvcFramework.Extensions;
 using SIS.MvcFramework.Identity;
 using SIS.MvcFramework.ViewEngine;
@@ -23,13 +21,10 @@ namespace SIS.MvcFramework
 
         protected Controller()
         {
-            this.ViewData = new Dictionary<string, string>();
             this.viewEngine = new SisViewEngine();
         }
 
         public IHttpRequest Request { get; set; }
-
-        protected Dictionary<string, string> ViewData { get; }
 
         public Principal User
             => this.Request.Session.GetParameter<Principal>("principal");
@@ -49,16 +44,6 @@ namespace SIS.MvcFramework
         protected void SignOut()
             => this.Request.Session.ClearParameters();
 
-        //private void ParseTemplate(ref string html)
-        //{
-        //    foreach (KeyValuePair<string, string> pair in this.ViewData)
-        //    {
-        //        (string key, string value) = (pair.Key, pair.Value);
-
-        //        html = html.Replace($"{{{{{{{key}}}}}}}", value);
-        //    }
-        //}
-
         private string GetFileContent(string filePath)
             => System.IO.File.ReadAllText(filePath);
 
@@ -75,7 +60,7 @@ namespace SIS.MvcFramework
             string html = layout.Replace("@RenderBody()", content)
                 .Replace("@RenderNav()", nav);
 
-            html = this.viewEngine.GetHtml(html, model);
+            html = this.viewEngine.GetHtml(html, model, this.User);
 
             return new HtmlResult(html, httpResponseStatusCode);
         }

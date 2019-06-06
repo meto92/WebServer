@@ -47,7 +47,7 @@ namespace IRunes.App.Controllers
         }
 
         [HttpPost(ActionName = nameof(Login))]
-        public ActionResult PostLogin(LoginUserViewModel model)
+        public ActionResult PostLogin(UserLoginViewModel model)
         {
             model.UsernameOrEmail = model.UsernameOrEmail.Trim();
 
@@ -81,7 +81,7 @@ namespace IRunes.App.Controllers
         }
 
         [HttpPost(ActionName = nameof(Register))]
-        public ActionResult PostRegister(RegisterUserViewModel model)
+        public ActionResult PostRegister(UserRegisterViewModel model)
         {
             model.Username = model.Username.Trim();
 

@@ -12,6 +12,7 @@ using SIS.MvcFramework.Identity;
 using SIS.MvcFramework.Mapping;
 using SIS.MvcFramework.Results;
 using SIS.MvcFramework.Routing;
+using SIS.MvcFramework.Sessions;
 
 namespace SIS.MvcFramework
 {
@@ -90,13 +91,14 @@ namespace SIS.MvcFramework
         public static void Start(IMvcApplication app)
         {
             IServerRoutingTable serverRoutingTable = new ServerRoutingTable();
+            IHttpSessionStorage httpSessionStorage = new HttpSessionStorage();
 
             app.ConfigureServices();
             app.Configure();
 
             AutoRegisterRoutes(app, serverRoutingTable);
 
-            new Server(80, serverRoutingTable).Run();
+            new Server(80, serverRoutingTable, httpSessionStorage).Run();
         }
     }
 }

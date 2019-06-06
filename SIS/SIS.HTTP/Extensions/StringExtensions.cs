@@ -1,4 +1,4 @@
-﻿using SIS.HTTP.Common;
+﻿using SIS.Common;
 
 namespace SIS.HTTP.Extensions
 {
@@ -6,7 +6,7 @@ namespace SIS.HTTP.Extensions
     {
         public static string Capitalize(this string strToCapitalize)
         {
-            CoreValidator.ThrowIfNullOrEmpty(strToCapitalize, nameof(strToCapitalize));
+            strToCapitalize.ThrowIfNullOrEmpty(nameof(strToCapitalize));
             
             return char.ToUpper(strToCapitalize[0]) +
                 strToCapitalize.Substring(1, strToCapitalize.Length - 1).ToLower();

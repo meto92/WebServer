@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-
+using SIS.Common;
 using SIS.HTTP.Common;
 
 namespace SIS.HTTP.Cookies
@@ -16,7 +16,7 @@ namespace SIS.HTTP.Cookies
 
         public void AddCookie(HttpCookie cookie)
         {
-            CoreValidator.ThrowIfNull(cookie, nameof(cookie));
+            cookie.ThrowIfNull(nameof(cookie));
 
             this.cookies[cookie.Key] = cookie;
         }

@@ -1,8 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using SIS.MvcFramework.Results;
+﻿using System.IO;
+
 using SIS.MvcFramework.ViewEngine;
+
 using Xunit;
 
 namespace SIS.MvcFramework.Tests
@@ -22,7 +21,7 @@ namespace SIS.MvcFramework.Tests
 
             IViewEngine viewEngine = new SisViewEngine();
 
-            string actualResult = viewEngine.GetHtml<TestViewModel>(viewContent, new TestViewModel());
+            string actualResult = viewEngine.GetHtml(viewContent, new TestViewModel());
 
             Assert.Equal(expectedResult, actualResult);
         }

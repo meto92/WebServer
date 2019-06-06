@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
+using SIS.Common;
 using SIS.HTTP.Common;
 using SIS.HTTP.Cookies;
 using SIS.HTTP.Enums;
@@ -16,7 +17,7 @@ namespace SIS.HTTP.Requests
     {
         public HttpRequest(string requestString)
         {
-            CoreValidator.ThrowIfNullOrEmpty(requestString, nameof(requestString));
+            requestString.ThrowIfNullOrEmpty(nameof(requestString));
 
             this.FormData = new Dictionary<string, object>();
             this.QueryData = new Dictionary<string, object>();

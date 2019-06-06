@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace SIS.HTTP.Common
+namespace SIS.Common
 {
-    public class CoreValidator
+    public static class ValidationExtensions
     {
         private const string InvalidStringMessage = "{0} cannot be null or empty.";
 
-        public static void ThrowIfNull(object obj, string name)
+        public static void ThrowIfNull(this object obj, string name)
         {
             if (obj == null)
             {
@@ -14,7 +14,7 @@ namespace SIS.HTTP.Common
             }
         }
 
-        public static void ThrowIfNullOrEmpty(string str, string name)
+        public static void ThrowIfNullOrEmpty(this string str, string name)
         {
             if (string.IsNullOrEmpty(str))
             {

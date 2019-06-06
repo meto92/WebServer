@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+using SIS.Common;
 using SIS.HTTP.Common;
 
 namespace SIS.HTTP.Headers
@@ -14,21 +14,21 @@ namespace SIS.HTTP.Headers
 
         public void AddHeader(HttpHeader header)
         {
-            CoreValidator.ThrowIfNull(header, nameof(header));
+            header.ThrowIfNull(nameof(header));
 
             this.headers[header.Key] = header;
         }
 
         public bool ContainsHeader(string key)
         {
-            CoreValidator.ThrowIfNullOrEmpty(key, nameof(key));
+            key.ThrowIfNullOrEmpty(nameof(key));
 
             return this.headers.ContainsKey(key);
         }
 
         public HttpHeader GetHeader(string key)
         {
-            CoreValidator.ThrowIfNullOrEmpty(key, nameof(key));
+            key.ThrowIfNullOrEmpty(nameof(key));
 
             return this.headers.TryGetValue(key, out HttpHeader header)
                 ? header

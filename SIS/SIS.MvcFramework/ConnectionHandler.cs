@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-using SIS.HTTP.Common;
+using SIS.Common;
 using SIS.HTTP.Cookies;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Exceptions;
@@ -23,16 +23,20 @@ namespace SIS.MvcFramework
 
         private readonly Socket client;
         private readonly IServerRoutingTable serverRoutingTable;
+        private readonly IHttpSessionStorage httpSessionStorage;
 
         public ConnectionHandler(
             Socket client, 
-            IServerRoutingTable serverRoutingTable)
+            IServerRoutingTable serverRoutingTable,
+            IHttpSessionStorage httpSessionStorage)
         {
-            CoreValidator.ThrowIfNull(client, nameof(client));
-            CoreValidator.ThrowIfNull(serverRoutingTable, nameof(serverRoutingTable));
+            client.ThrowIfNull(nameof(client));
+            serverRoutingTable.ThrowIfNull(nameof(serverRoutingTable));
+            httpSessionStorage.ThrowIfNull(nameof(httpSessionStorage));
 
             this.client = client;
             this.serverRoutingTable = serverRoutingTable;
+            this.httpSessionStorage = httpSessionStorage;
         }
 
         private async Task<IHttpRequest> ReadRequest()
@@ -118,7 +122,7 @@ namespace SIS.MvcFramework
                     .Value
                 : Guid.NewGuid().ToString();
 
-            httpRequest.Session = HttpSessionStorage.GetSession(sessionId);
+            httpRequest.Session = this.httpSessionStorage.GetSession(sessionId);
 
             return httpRequest.Session.Id;
         }

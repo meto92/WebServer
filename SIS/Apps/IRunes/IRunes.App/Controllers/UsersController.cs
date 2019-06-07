@@ -23,7 +23,7 @@ namespace IRunes.App.Controllers
             this.hashService = hashService;
         }
 
-        public ActionResult Login()
+        public IActionResult Login()
         {
             SignOut();
 
@@ -31,7 +31,7 @@ namespace IRunes.App.Controllers
         }
 
         [NonAction]
-        private ActionResult ValidateUsernameAndPassword(string username, string password)
+        private IActionResult ValidateUsernameAndPassword(string username, string password)
         {
             if (username.Length < MinUsernameLength)
             {
@@ -46,12 +46,12 @@ namespace IRunes.App.Controllers
             return null;
         }
 
-        [HttpPost(ActionName = nameof(Login))]
-        public ActionResult PostLogin(UserLoginViewModel model)
+        [HttpPost]
+        public IActionResult Login(UserLoginViewModel model)
         {
             model.UsernameOrEmail = model.UsernameOrEmail.Trim();
 
-            ActionResult responseForValidation = this.ValidateUsernameAndPassword(model.UsernameOrEmail, model.Password);
+            IActionResult responseForValidation = this.ValidateUsernameAndPassword(model.UsernameOrEmail, model.Password);
 
             if (responseForValidation != null)
             {
@@ -73,19 +73,19 @@ namespace IRunes.App.Controllers
             return Redirect("/");
         }
 
-        public ActionResult Register()
+        public IActionResult Register()
         {
             SignOut();
 
             return View();
         }
 
-        [HttpPost(ActionName = nameof(Register))]
-        public ActionResult PostRegister(UserRegisterViewModel model)
+        [HttpPost]
+        public IActionResult Register(UserRegisterViewModel model)
         {
             model.Username = model.Username.Trim();
 
-            ActionResult responseForValidation = this.ValidateUsernameAndPassword(model.Username, model.Password);
+            IActionResult responseForValidation = this.ValidateUsernameAndPassword(model.Username, model.Password);
 
             if (responseForValidation != null)
             {
@@ -115,7 +115,7 @@ namespace IRunes.App.Controllers
             return Redirect("/Users/Login");
         }
 
-        public ActionResult Logout()
+        public IActionResult Logout()
         {
             SignOut();
 

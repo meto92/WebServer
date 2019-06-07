@@ -13,9 +13,9 @@ namespace SIS.HTTP.Requests
 
         string Url { get; }
 
-        IDictionary<string, object> FormData { get; }
+        IDictionary<string, ISet<string>> FormData { get; }
 
-        IDictionary<string, object> QueryData { get; }
+        IDictionary<string, ISet<string>> QueryData { get; }
 
         IHttpHeaderCollection Headers { get; }
 

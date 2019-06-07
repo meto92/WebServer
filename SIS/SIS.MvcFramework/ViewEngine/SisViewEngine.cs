@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -41,13 +43,23 @@ namespace SIS.MvcFramework.ViewEngine
 
                 if (!compilationResult.Success)
                 {
-                    foreach (var error in compilationResult.Diagnostics
-                        .Where(x => x.Severity == DiagnosticSeverity.Error))
-                    {
-                        Console.WriteLine(error.GetMessage());
-                    }
+                    IEnumerable<Diagnostic> errors = compilationResult.Diagnostics
+                        .Where(x => x.Severity == DiagnosticSeverity.Error);
 
-                    return null;
+                    //foreach (var error in errors)
+                    //{
+
+                    //}
+
+                    string heading = $"<h1>Errors: {errors.Count()}</h1>";
+                    string errorLines = string.Join(
+                        Environment.NewLine,
+                        errors.Select(error => $"<div>{error.Location} => {error.GetMessage()}</div>"));
+
+                    return new ErrorView(string.Concat(
+                        heading,
+                        errorLines,
+                        $"<pre>{WebUtility.HtmlEncode(code)}</pre>"));
                 }
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
@@ -140,7 +152,7 @@ namespace SIS.MvcFramework.ViewEngine
 
         private string GetCSharpCode(string viewContent)
         {
-            string[] lines = viewContent.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            string[] lines = viewContent.Split(new[] { "\r\n", "\n\r", "\n" }, StringSplitOptions.None);
             StringBuilder csharpCode = new StringBuilder();
 
             string[] supportedOperators =
@@ -175,13 +187,7 @@ namespace SIS.MvcFramework.ViewEngine
                 }
                 else
                 {
-                    if (!line.Contains("@"))
-                    {
-                        string csharpLine = $"html.AppendLine(@\"{line.Replace("\"", "\"\"")}\");";
-
-                        csharpCode.AppendLine(csharpLine);
-                    }
-                    else if (line.Contains("@Render"))
+                    if (line.Contains("@Render"))
                     {
                         csharpCode.AppendLine($"html.AppendLine(@\"{line}\");");
                     }

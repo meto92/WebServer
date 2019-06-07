@@ -12,7 +12,7 @@ using SIS.MvcFramework.Results;
 
 namespace IRunes.App.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class TracksController : Controller
     {
         private const int MinTrackNameLength = 3;
@@ -27,7 +27,7 @@ namespace IRunes.App.Controllers
             this.albumService = albumService;
         }
 
-        public ActionResult Create(string albumId)
+        public IActionResult Create(string albumId)
         {
             if (albumId == null)
             {
@@ -40,8 +40,8 @@ namespace IRunes.App.Controllers
             });
         }
 
-        [HttpPost(ActionName = nameof(Create))]
-        public ActionResult PostCreate(TrackCreateViewModel model, string albumId)
+        [HttpPost]
+        public IActionResult Create(TrackCreateViewModel model, string albumId)
         {
             if (albumId == null)
             {
@@ -76,7 +76,7 @@ namespace IRunes.App.Controllers
             return Redirect("/");
         }
 
-        public ActionResult Details(string albumId, string trackId)
+        public IActionResult Details(string albumId, string trackId)
         {
             if (albumId == null || trackId == null)
             {

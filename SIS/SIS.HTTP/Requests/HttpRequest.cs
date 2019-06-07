@@ -19,8 +19,8 @@ namespace SIS.HTTP.Requests
         {
             requestString.ThrowIfNullOrEmpty(nameof(requestString));
 
-            this.FormData = new Dictionary<string, object>();
-            this.QueryData = new Dictionary<string, object>();
+            this.FormData = new Dictionary<string, ISet<string>>();
+            this.QueryData = new Dictionary<string, ISet<string>>();
             this.Headers = new HttpHeaderCollection();
             this.Cookies = new HttpCookieCollection();
             
@@ -31,9 +31,9 @@ namespace SIS.HTTP.Requests
 
         public string Url { get; private set; }
 
-        public IDictionary<string, object> FormData { get; }
+        public IDictionary<string, ISet<string>> FormData { get; }
 
-        public IDictionary<string, object> QueryData { get; }
+        public IDictionary<string, ISet<string>> QueryData { get; }
 
         public IHttpHeaderCollection Headers { get; }
 
@@ -122,7 +122,7 @@ namespace SIS.HTTP.Requests
             }
         }
 
-        private void SaveParameters(string[] parameters, IDictionary<string, object> dict)
+        private void SaveParameters(string[] parameters, IDictionary<string, ISet<string>> dict)
         {
             foreach (string[] kvp in parameters
                 .Select(kvp => kvp.Split("=")))
@@ -135,7 +135,12 @@ namespace SIS.HTTP.Requests
                 string key = kvp[0];
                 string value = WebUtility.UrlDecode(kvp[1]);
 
-                dict[key] = value;
+                if (!dict.ContainsKey(key))
+                {
+                    dict[key] = new HashSet<string>();
+                }
+
+                dict[key].Add(value);
             }
         }
 

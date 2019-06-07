@@ -47,7 +47,7 @@ namespace SIS.MvcFramework
         private string GetFileContent(string filePath)
             => System.IO.File.ReadAllText(filePath);
 
-        protected ActionResult View<T>(T model, string htmlFilePath, HttpResponseStatusCode httpResponseStatusCode = HttpResponseStatusCode.OK)
+        protected IActionResult View<T>(T model, string htmlFilePath, HttpResponseStatusCode httpResponseStatusCode = HttpResponseStatusCode.OK)
             where T : class
         {
             string layout = this.GetFileContent(LayoutPath);
@@ -65,7 +65,7 @@ namespace SIS.MvcFramework
             return new HtmlResult(html, httpResponseStatusCode);
         }
 
-        protected ActionResult View<T>(T model, [CallerMemberName]string action = "")
+        protected IActionResult View<T>(T model, [CallerMemberName]string action = "")
             where T : class
         {
             string fullControllerName = this.GetType().Name;
@@ -74,7 +74,7 @@ namespace SIS.MvcFramework
             return View(model, $"{controllerName}/{action}", HttpResponseStatusCode.OK);
         }
 
-        protected ActionResult View([CallerMemberName]string action = "")
+        protected IActionResult View([CallerMemberName]string action = "")
         {
             string fullControllerName = this.GetType().Name;
             string controllerName = fullControllerName.Substring(0, fullControllerName.Length - nameof(Controller).Length);
@@ -82,12 +82,12 @@ namespace SIS.MvcFramework
             return View<object>(null, $"{controllerName}/{action}", HttpResponseStatusCode.OK);
         }
 
-        protected ActionResult BadRequestError(string errorMessage)
+        protected IActionResult BadRequestError(string errorMessage)
             => new HtmlResult(
                 $"<h1>{errorMessage}</h1>",
                 HttpResponseStatusCode.BadRequest);
 
-        protected ActionResult ServerError(string errorMessage)
+        protected IActionResult ServerError(string errorMessage)
             => new HtmlResult(
                 $"<h1>{errorMessage}</h1>",
                 HttpResponseStatusCode.InternalServerError);
@@ -98,19 +98,19 @@ namespace SIS.MvcFramework
         protected bool IsLoggedIn()
             => this.User != null;
 
-        protected ActionResult Redirect(string location)
+        protected IActionResult Redirect(string location)
             => new RedirectResult(location);
 
-        protected ActionResult Xml(object obj)
+        protected IActionResult Xml(object obj)
             => new XmlResult(obj.ToXml());
 
-        protected ActionResult Json(object obj)
+        protected IActionResult Json(object obj)
             => new JsonResult(obj.ToJson());
 
-        protected ActionResult File(byte[] fileContent)
+        protected IActionResult File(byte[] fileContent)
             => new FileResult(fileContent);
 
-        protected ActionResult NotFound(string message)
+        protected IActionResult NotFound(string message)
             => new NotFoundResult(message);
     }
 }

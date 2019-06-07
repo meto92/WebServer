@@ -7,14 +7,10 @@ namespace IRunes.App.Controllers
     public class HomeController : Controller
     {
         [HttpGet(Path = "/")]
-        public ActionResult IndexSlash()
+        public IActionResult IndexSlash()
             => Index();
 
-        public ActionResult Index()
-        {
-            string username = GetUsername();
-
-            return View();
-        }
+        public IActionResult Index()
+            => View();
     }
 }

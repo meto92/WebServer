@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 
 using SIS.HTTP.Enums;
+using SIS.HTTP.Requests;
 using SIS.HTTP.Responses;
 using SIS.MvcFramework.Attributes.Action;
 using SIS.MvcFramework.Attributes.Methods;
@@ -34,6 +35,34 @@ namespace SIS.MvcFramework
         private static Controller CreateController(Type controllerType, IServiceProvider serviceProvider)
         {
             return (Controller) serviceProvider.CreateInstance(controllerType);
+        }        
+
+        private static IHttpResponse ProcessRequest(
+            IHttpRequest request,
+            IServiceProvider serviceProvider,
+            MethodInfo action,
+            Type controllerType)
+        {
+            Controller controller = CreateController(controllerType, serviceProvider);
+
+            controller.Request = request;
+
+            Principal controllerPrincipal = controller.User;
+
+            AuthorizeAttribute controllerAuthAttr = controllerType.GetCustomAttribute<AuthorizeAttribute>();
+            AuthorizeAttribute actionAuthAttr = action.GetCustomAttribute<AuthorizeAttribute>();
+
+            if ((controllerAuthAttr != null && !controllerAuthAttr.IsAuthorized(controllerPrincipal))
+            || (actionAuthAttr != null && !actionAuthAttr.IsAuthorized(controllerPrincipal)))
+            {
+                return new RedirectResult(UnauthorizedRedirectUrl);
+            }
+
+            ParameterInfo[] actionParameters = parametersByActionByControllerType[controllerType][action];
+
+            object[] actionParameterObjects = ActionParametersMapper.GetActionObjectParameters(actionParameters, request);
+
+            return (IHttpResponse) action.Invoke(controller, actionParameterObjects);
         }
 
         private static void AutoRegisterRoutes(IMvcApplication app, IServerRoutingTable serverRoutingTable, IServiceProvider serviceProvider)
@@ -50,50 +79,37 @@ namespace SIS.MvcFramework
                 parametersByActionByControllerType[controllerType] = new Dictionary<MethodInfo, ParameterInfo[]>();
 
                 controllerType.GetMethods()
-                    .Where(action => action.GetCustomAttribute<NonActionAttribute>() == null
+                    .Where((action => (action.GetCustomAttribute<NonActionAttribute>() == null
                         && typeof(IHttpResponse).IsAssignableFrom(action.ReturnType)
-                        && action.DeclaringType == controllerType)
+                        && action.DeclaringType == controllerType)))
                     .ToList()
                     .ForEach(action =>
                     {
                         parametersByActionByControllerType[controllerType][action] = action.GetParameters();
 
                         HttpMethodAttribute httpMethodAttribute = action.GetCustomAttribute<HttpMethodAttribute>();
-                        
+
                         string actionName = httpMethodAttribute?.ActionName ?? action.Name;
                         HttpRequestMethod httpRequestMethod = httpMethodAttribute?.HttpMethod ?? HttpRequestMethod.Get;
                         string path = httpMethodAttribute?.Path ?? $"/{controllerType.Name.Replace(nameof(Controller), string.Empty)}/{actionName}";
-                        
+
                         serverRoutingTable.Add(
-                            httpRequestMethod,
-                            path,
-                            req =>
-                            {
-                                Controller controller = CreateController(controllerType, serviceProvider);
-
-                                controller.Request = req;
-
-                                Principal controllerPrincipal = controller.User;
-
-                                AuthorizeAttribute controllerAuthAttr = controllerType.GetCustomAttribute<AuthorizeAttribute>();
-                                AuthorizeAttribute actionAuthAttr = action.GetCustomAttribute<AuthorizeAttribute>();
-
-                                if ((controllerAuthAttr != null && !controllerAuthAttr.IsAuthorized(controllerPrincipal))
-                                || (actionAuthAttr != null && !actionAuthAttr.IsAuthorized(controllerPrincipal)))
-                                {
-                                    return new RedirectResult(UnauthorizedRedirectUrl);
-                                }
-                                
-                                object[] actionParameterObjects = ActionParameterMapper.Instance.MapActionParameters(parametersByActionByControllerType[controllerType][action], req);
-
-                                return (IHttpResponse) action.Invoke(controller, actionParameterObjects);
-                            });
+                            httpRequestMethod, 
+                            path, 
+                            req => ProcessRequest(
+                                req, 
+                                serviceProvider, 
+                                action, 
+                                controllerType));
                     });
             }
         }
 
-        public static void Start(IMvcApplication app)
+        public static void Start<MvcApplication>()
+            where MvcApplication : IMvcApplication, new()
         {
+            IMvcApplication app = (IMvcApplication) Activator.CreateInstance(typeof(MvcApplication));
+
             IServiceProvider serviceProvider = new ServiceProvider();
             IServerRoutingTable serverRoutingTable = new ServerRoutingTable();
             IHttpSessionStorage httpSessionStorage = new HttpSessionStorage();

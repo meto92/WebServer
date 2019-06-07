@@ -23,7 +23,7 @@ namespace IRunes.App.Controllers
         public AlbumsController(IAlbumService albumService)
             => this.albumService = albumService;
 
-        public ActionResult All()
+        public IActionResult All()
         {
             IEnumerable<Album> allAlbums = this.albumService.All();
 
@@ -35,11 +35,11 @@ namespace IRunes.App.Controllers
             return View(allAlbumsViewModel);
         }
 
-        public ActionResult Create()
+        public IActionResult Create()
             => View();
 
-        [HttpPost(ActionName = nameof(Create))]
-        public ActionResult PostCreate(AlbumCreateViewModel model)
+        [HttpPost]
+        public IActionResult Create(AlbumCreateViewModel model)
         {
             if (model.Name.Length < MinAlbumNameLength
                 || model.Cover.Length < MinAlbumCoverLength)
@@ -58,7 +58,7 @@ namespace IRunes.App.Controllers
             return Redirect("/Albums/All");
         }
 
-        public ActionResult Details(string id)
+        public IActionResult Details(string id)
         {
             if (id == null)
             {

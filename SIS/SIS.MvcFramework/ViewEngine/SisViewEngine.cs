@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
+
 using SIS.MvcFramework.Identity;
 using SIS.MvcFramework.Validation;
 
@@ -28,6 +29,7 @@ namespace SIS.MvcFramework.ViewEngine
                 .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(IView).Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(Assembly.GetEntryAssembly().Location))
+                .AddReferences(MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location))
                 .AddReferences(MetadataReference.CreateFromFile(modelAssembly.Location));
 
             AssemblyName[] netStandardAssemblyNames = Assembly.Load(new AssemblyName("netstandard")).GetReferencedAssemblies();
@@ -47,11 +49,6 @@ namespace SIS.MvcFramework.ViewEngine
                 {
                     IEnumerable<Diagnostic> errors = compilationResult.Diagnostics
                         .Where(x => x.Severity == DiagnosticSeverity.Error);
-
-                    //foreach (var error in errors)
-                    //{
-
-                    //}
 
                     string heading = $"<h1>Errors: {errors.Count()}</h1>";
                     string errorLines = string.Join(

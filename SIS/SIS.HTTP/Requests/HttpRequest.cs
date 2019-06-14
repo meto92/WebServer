@@ -49,7 +49,7 @@ namespace SIS.HTTP.Requests
 
         private bool IsValidRequestQueryString()
             => this.Url.Contains("?")
-                && this.Url.Split("?")[1]
+                && this.Url.Split('?')[1]
                     .Contains("=");
 
         private void ParseRequestMethod(string[] requestLineParameters)
@@ -81,7 +81,7 @@ namespace SIS.HTTP.Requests
 
             for (int i = 0; i < emptyLineIndex; i++)
             {
-                string[] kvp = requestContent[i].Split(": ");
+                string[] kvp = requestContent[i].Split(new[] { ": "}, StringSplitOptions.None);
 
                 string key = kvp[0];
                 string value = kvp[1];
@@ -108,10 +108,10 @@ namespace SIS.HTTP.Requests
                 .GetHeader(HttpHeader.Cookie)
                 .Value;
 
-            string[] cookieParts = cookiesValue.Split("; ");
+            string[] cookieParts = cookiesValue.Split(new[] { "; " }, StringSplitOptions.None);
 
             foreach (string[] cookieKvp in cookieParts
-                .Select(kvp => kvp.Split("=", 2))
+                .Select(kvp => kvp.Split('='))
                 .Where(kvp => kvp.Length == 2))
             {
                 (string key, string value) = (cookieKvp[0], cookieKvp[1]);
@@ -125,7 +125,7 @@ namespace SIS.HTTP.Requests
         private void SaveParameters(string[] parameters, IDictionary<string, ISet<string>> dict)
         {
             foreach (string[] kvp in parameters
-                .Select(kvp => kvp.Split("=")))
+                .Select(kvp => kvp.Split('=')))
             {
                 if (kvp.Length != 2)
                 {
@@ -152,7 +152,7 @@ namespace SIS.HTTP.Requests
             }
 
             string[] queryParameters = this.Url.Split(new[] { '?', '#' })[1]
-                .Split("&");
+                .Split('&');
 
             this.SaveParameters(queryParameters, this.QueryData);
         }
@@ -164,7 +164,7 @@ namespace SIS.HTTP.Requests
                 return;
             }
 
-            string[] formDataParameters = formData.Split("&");
+            string[] formDataParameters = formData.Split('&');
 
             this.SaveParameters(formDataParameters, this.FormData);            
         }
@@ -177,7 +177,7 @@ namespace SIS.HTTP.Requests
 
         private void ParseRequest(string requestString)
         {
-            string[] splitRequestContent = requestString.Split(GlobalConstants.HttpNewLine);
+            string[] splitRequestContent = requestString.Split(new[] { GlobalConstants.HttpNewLine }, StringSplitOptions.None);
 
             string[] requestLineParameters = splitRequestContent[0].Trim()
                 .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

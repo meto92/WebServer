@@ -46,7 +46,7 @@ namespace SIS.MvcFramework
 
             while (true)
             {
-                int readBytesCount = await this.client.ReceiveAsync(data.Array, SocketFlags.None);
+                int readBytesCount = await this.client.ReceiveAsync(data, SocketFlags.None);
 
                 if (readBytesCount == 0)
                 {
@@ -109,11 +109,11 @@ namespace SIS.MvcFramework
             return response;
         }
 
-        private async Task PrepareResponse(IHttpResponse httpResponse)
+        private void PrepareResponse(IHttpResponse httpResponse)
         {
             byte[] byteSegments = httpResponse.GetBytes();
 
-            await this.client.SendAsync(byteSegments, SocketFlags.None);
+            this.client.Send(byteSegments, SocketFlags.None);
         }
 
         private void ShutdownClient()
@@ -164,7 +164,7 @@ namespace SIS.MvcFramework
                 httpResponse = new TextResult(e.ToString(), HttpResponseStatusCode.InternalServerError);
             }
 
-            await this.PrepareResponse(httpResponse);
+            this.PrepareResponse(httpResponse);
             this.ShutdownClient();
         }
     }

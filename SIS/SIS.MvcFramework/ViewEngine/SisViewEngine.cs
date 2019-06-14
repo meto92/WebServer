@@ -12,12 +12,14 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using SIS.MvcFramework.Identity;
+using SIS.MvcFramework.Validation;
 
 namespace SIS.MvcFramework.ViewEngine
 {
     public class SisViewEngine : IViewEngine
     {
         private const string InvalidExpressionMessage = "Insufficient expression parentheses count: {0}";
+        private const string WidgetsPrefix = "@Widgets.";
 
         private IView CompileAndInstance(string code, Assembly modelAssembly)
         {
@@ -162,38 +164,71 @@ namespace SIS.MvcFramework.ViewEngine
                 "for"
             };
 
+            int csharpCodeDepth = 0;
+
             foreach (string line in lines)
             {
-                if (line.TrimStart().StartsWith("{")
-                    && line.TrimEnd().EndsWith("}"))
-                {
-                    int openingBracketIndex = line.IndexOf("{");
-                    int closingBracketIndex = line.LastIndexOf("}");
+                string currentLine = line;
 
-                    string lineWithoutBrackets = line.Substring(openingBracketIndex + 1, closingBracketIndex - openingBracketIndex - 1);
+                if (currentLine.TrimStart().StartsWith("{")
+                    && currentLine.TrimEnd().EndsWith("}"))
+                {
+                    int openingBracketIndex = currentLine.IndexOf("{");
+                    int closingBracketIndex = currentLine.LastIndexOf("}");
+
+                    string lineWithoutBrackets = currentLine.Substring(openingBracketIndex + 1, closingBracketIndex - openingBracketIndex - 1);
 
                     csharpCode.AppendLine(lineWithoutBrackets);
                 }
-                else if (line.TrimStart().StartsWith("{")
-                    || line.TrimStart().StartsWith("}"))
+                else if (currentLine.TrimStart().StartsWith("@{"))
                 {
-                    csharpCode.AppendLine(line);
+                    csharpCodeDepth++;
                 }
-                else if (supportedOperators.Any(x => line.TrimStart().StartsWith($"@{x}")))
+                else if (currentLine.TrimStart().StartsWith("{")
+                    || currentLine.TrimStart().StartsWith("}"))
                 {
-                    string lineWithoutAtSign = line.Substring(line.IndexOf("@") + 1);
+                    if (csharpCodeDepth > 0)
+                    {
+                        if (currentLine.TrimStart().StartsWith("{"))
+                        {
+                            csharpCodeDepth++;
+                        }
+                        else if (currentLine.TrimStart().StartsWith("}"))
+                        {
+                            if (--csharpCodeDepth == 0)
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
+                    csharpCode.AppendLine(currentLine);
+                }
+                else if (csharpCodeDepth > 0)
+                {
+                    csharpCode.AppendLine(currentLine);
+                    continue;
+                }                
+                else if (currentLine.TrimStart().StartsWith("{")
+                    || currentLine.TrimStart().StartsWith("}"))
+                {
+                    csharpCode.AppendLine(currentLine);
+                }
+                else if (supportedOperators.Any(x => currentLine.TrimStart().StartsWith($"@{x}")))
+                {
+                    string lineWithoutAtSign = currentLine.Substring(currentLine.IndexOf("@") + 1);
 
                     csharpCode.AppendLine(lineWithoutAtSign);
                 }
                 else
                 {
-                    if (line.Contains("@Render"))
+                    if (currentLine.Contains("@RenderBody()"))
                     {
-                        csharpCode.AppendLine($"html.AppendLine(@\"{line}\");");
+                        csharpCode.AppendLine($"html.AppendLine(@\"{currentLine}\");");
                     }
                     else
                     {
-                        HandleCSharpExpressions(line, csharpCode);
+                        HandleCSharpExpressions(currentLine, csharpCode);
                     }
                 }
             }
@@ -201,7 +236,24 @@ namespace SIS.MvcFramework.ViewEngine
              return csharpCode.ToString();
         }
 
-        public string GetHtml<T>(string viewContent, T model, Principal user = null)
+        private string CheckForWidgets(string viewContent)
+        {
+            Assembly.GetEntryAssembly()
+                .GetTypes()
+                .Where(type => typeof(IViewWidget).IsAssignableFrom(type))
+                .Select(widgetType => (IViewWidget) Activator.CreateInstance(widgetType))
+                .ToList()
+                .ForEach(widget => 
+                {
+                    string widgetTypeName = widget.GetType().Name;
+
+                    viewContent = viewContent.Replace($"{WidgetsPrefix}{widgetTypeName}", widget.Render());
+                });
+
+            return viewContent;
+        }
+
+        public string GetHtml<T>(string viewContent, T model, ModelStateDictionary modelState, Principal user = null)
         {
             Type modelType = model?.GetType() ?? typeof(T);
             string modelTypeName = modelType.Name;
@@ -210,13 +262,14 @@ namespace SIS.MvcFramework.ViewEngine
             {
                 model = (T) new object();
             }
-            else if (typeof(IEnumerable).IsAssignableFrom(model.GetType()))
+            else if ((modelType.IsArray || modelType.IsGenericType
+                && typeof(IEnumerable).IsAssignableFrom(modelType)))
             {
                 // simple array
                 if (modelType.IsArray)
                 {
+                    //string arrayType = modelType.GetElementType().ToString();
                     string arrayType = modelTypeName.Substring(0, modelTypeName.IndexOf("["));
-
                     modelTypeName = $"{arrayType}[]";
                 }
                 else
@@ -227,7 +280,7 @@ namespace SIS.MvcFramework.ViewEngine
                 }
             }
 
-            string csharpHtmlCode = GetCSharpCode(viewContent);
+            string csharpHtmlCode = GetCSharpCode(CheckForWidgets(viewContent));
             string code = $@"
 using System;
 using System.Text;
@@ -235,6 +288,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 using SIS.MvcFramework.Identity;
+using SIS.MvcFramework.Validation;
 using SIS.MvcFramework.ViewEngine;
 
 using {model.GetType().Namespace};
@@ -243,7 +297,7 @@ namespace AppViewCodeNamespace
 {{
     public class AppViewCode : IView
     {{
-        public string GetHtml(object model, Principal user)
+        public string GetHtml(object model, ModelStateDictionary ModelState, Principal user)
         {{
             {modelTypeName} Model = ({modelTypeName}) model;
             Principal User = user;
@@ -259,9 +313,9 @@ namespace AppViewCodeNamespace
 
             IView view = CompileAndInstance(code, model.GetType().Assembly);
             
-            string htmlResult = view?.GetHtml(model, user);
+            string htmlResult = view?.GetHtml(model, modelState, user);
 
             return htmlResult;
-        }        
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace IRunes.App.ViewModels
+namespace IRunes.App.ViewModels.Albums
 {
     public class AllAlbumsViewModel
     {

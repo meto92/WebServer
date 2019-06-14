@@ -21,7 +21,7 @@ namespace SIS.MvcFramework.Tests
 
             IViewEngine viewEngine = new SisViewEngine();
 
-            string actualResult = viewEngine.GetHtml(viewContent, new TestViewModel());
+            string actualResult = viewEngine.GetHtml(viewContent, new TestViewModel(), null);
 
             Assert.Equal(expectedResult, actualResult);
         }

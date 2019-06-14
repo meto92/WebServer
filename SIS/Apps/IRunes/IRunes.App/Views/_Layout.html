@@ -1,8 +1,8 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <link href="/Resources/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="/Resources/css/site.css" rel="stylesheet" />
+    <link href="/wwwroot/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/wwwroot/css/site.css" rel="stylesheet" />
     <title>IRunes</title>
 </head>
 <body>
@@ -10,7 +10,38 @@
         <header class="bg-success text-white container-fluid">
             <p class="title d-inline-block">IRunes</p>
 
-            @RenderNav()
+            @if (User == null)
+            {
+            <nav class="navbar navbar-expand-lg navbar-light d-inline-block">
+                <ul class="navbar-nav mr-auto d-flex flex-row">
+                    <li class="nav-item mr-3">
+                        <a href="/" class="nav-link  text-white">Home</a>
+                    </li>
+                    <li class="nav-item mr-3">
+                        <a href="/Users/Login" class="nav-link text-white">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/Users/Register" class="nav-link text-white">Register</a>
+                    </li>
+                </ul>
+            </nav>
+            }
+            @else
+            {
+            <nav class="navbar navbar-expand-lg navbar-light d-inline-block">
+                <ul class="navbar-nav mr-auto d-flex flex-row">
+                    <li class="nav-item mr-3">
+                        <a href="/" class="nav-link  text-white">Home</a>
+                    </li>
+                    <li class="nav-item mr-3">
+                        <a href="/Albums/All" class="nav-link  text-white">Albums</a>
+                    </li>
+                    <li class="nav-item mr-3">
+                        <a href="/Users/Logout" class="nav-link  text-white">Logout</a>
+                    </li>
+                </ul>
+            </nav>
+            }
         </header>
 
         <hr class="bg-success" />
@@ -24,8 +55,8 @@
         </footer>
     </div>
 
-    <script src="/Resources/js/jquery-3.4.1.min.js"></script>
-    <script src="/Resources/js/popper.min.js"></script>
-    <script src="/Resources/js/bootstrap.min.js"></script>
+    <script src="/wwwroot/js/jquery-3.4.1.min.js"></script>
+    <script src="/wwwroot/js/popper.min.js"></script>
+    <script src="/wwwroot/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,18 +1,21 @@
-﻿using IRunes.App.ViewModels;
+﻿using IRunes.App.ViewModels.Users;
 using IRunes.Models;
 using IRunes.Services;
 
+using SIS.HTTP.Enums;
 using SIS.MvcFramework;
-using SIS.MvcFramework.Attributes.Action;
 using SIS.MvcFramework.Attributes.Methods;
+using SIS.MvcFramework.Identity;
 using SIS.MvcFramework.Results;
 
 namespace IRunes.App.Controllers
 {
     public class UsersController : Controller
     {
-        private const int MinUsernameLength = 3;
-        private const int MinPasswordLength = 4;
+        private const string LoginFailedMessage = "Login failed.";
+        private const string InvalidUsernameOrPasswordMessage = "Invalid username or password.";
+        private const string RegistrationFailedMessage = "Registration failed";
+        private const string UsernameAlreadyTakenMessage = "Username already taken.";
 
         private readonly IUserService userService;
         private readonly IHashService hashService;
@@ -30,45 +33,26 @@ namespace IRunes.App.Controllers
             return View();
         }
 
-        [NonAction]
-        private IActionResult ValidateUsernameAndPassword(string username, string password)
-        {
-            if (username.Length < MinUsernameLength)
-            {
-                return BadRequestError($"Username must contain at least {MinUsernameLength} characters.");
-            }
-
-            if (password.Length < MinUsernameLength)
-            {
-                return BadRequestError($"Password must contain at least {MinPasswordLength} characters.");
-            }
-
-            return null;
-        }
-
         [HttpPost]
-        public IActionResult Login(UserLoginViewModel model)
+        public IActionResult Login(UserLoginInputModel model)
         {
             model.UsernameOrEmail = model.UsernameOrEmail.Trim();
 
-            IActionResult responseForValidation = this.ValidateUsernameAndPassword(model.UsernameOrEmail, model.Password);
-
-            if (responseForValidation != null)
+            if (!ModelState.IsValid)
             {
-                return responseForValidation;
+                return View();
             }
 
             User user = this.userService.Get(model.UsernameOrEmail, this.hashService.Hash(model.Password));
 
             if (user == null)
             {
-                return Redirect("/Users/Register");
+                ModelState.AddErrorMessage(LoginFailedMessage, InvalidUsernameOrPasswordMessage);
+
+                return View();
             }
 
-            Request.Session.ClearParameters();
-            Request.Session.AddParameter("username", user.Username);
-
-            SignIn(user.Id, user.Username, user.Email);
+            SignIn(user.Id, user.Username, user.Email, Role.User);
 
             return Redirect("/");
         }
@@ -81,35 +65,29 @@ namespace IRunes.App.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(UserRegisterViewModel model)
+        public IActionResult Register(UserRegisterInputModel model)
         {
             model.Username = model.Username.Trim();
 
-            IActionResult responseForValidation = this.ValidateUsernameAndPassword(model.Username, model.Password);
-
-            if (responseForValidation != null)
+            if (!ModelState.IsValid)
             {
-                return responseForValidation;
-            }
-
-            if (model.Password != model.ConfirmPassword
-                || model.Email.Length < 5)
-            {
-                return Redirect("/Users/Register");
+                return View();
             }
 
             bool exists = this.userService.Exists(model.Username);
 
             if (exists)
             {
-                return BadRequestError("Username already taken.");
+                ModelState.AddErrorMessage(RegistrationFailedMessage, UsernameAlreadyTakenMessage);
+
+                return View(new object(), "/Users/Register", HttpResponseStatusCode.BadRequest);
             }
 
             bool created = this.userService.Create(model.Username, this.hashService.Hash(model.Password), model.Email);
 
             if (!created)
             {
-                return ServerError("An error occurred while creating the account.");
+                return View(new object(), "/Users/Register", HttpResponseStatusCode.InternalServerError);
             }
 
             return Redirect("/Users/Login");

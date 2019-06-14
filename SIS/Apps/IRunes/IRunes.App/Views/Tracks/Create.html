@@ -4,6 +4,8 @@
 
         <hr class="bg-success" />
 
+        @Widgets.ValidationWidget
+
         <form action="/Tracks/Create?albumId=@Model.Id" method="post">
             <div class="form-group">
                 <label for="name">Name</label>
@@ -18,7 +20,7 @@
 
                 <div class="form-group col-md-5">
                     <label for="price">Price</label>
-                    <input type="text" id="price" name="PriceStr" placeholder="Price..." class="form-control" />
+                    <input type="text" id="price" name="Price" placeholder="Price..." class="form-control" />
                 </div>
             </div>
 

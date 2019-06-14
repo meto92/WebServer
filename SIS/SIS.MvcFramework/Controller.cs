@@ -1,11 +1,14 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
-using SIS.MvcFramework.Results;
 using SIS.HTTP.Enums;
 using SIS.HTTP.Requests;
-
 using SIS.MvcFramework.Extensions;
 using SIS.MvcFramework.Identity;
+using SIS.MvcFramework.Results;
+using SIS.MvcFramework.Validation;
 using SIS.MvcFramework.ViewEngine;
 
 namespace SIS.MvcFramework
@@ -14,28 +17,43 @@ namespace SIS.MvcFramework
     {
         private const string AppDir = "../../../";
         private const string LayoutPath = AppDir + "views/_layout.html";
-        private const string GuestNavPath = AppDir + "views/shared/guestNav.html";
-        private const string LoggedInUserNavPath = AppDir + "views/shared/loggedInUserNav.html";
+        private const string TypeNotEnumMessage = "The given type is not enum.";
 
         private readonly IViewEngine viewEngine;
 
         protected Controller()
         {
             this.viewEngine = new SisViewEngine();
+            this.ModelState = new ModelStateDictionary();
         }
 
         public IHttpRequest Request { get; set; }
 
+        public ModelStateDictionary ModelState { get; set; }
+
         public Principal User
             => this.Request.Session.GetParameter<Principal>("principal");
 
-        protected void SignIn(string id, string username, string email)
+        protected void SignIn<TRoleEnum>(string id, string username, string email, TRoleEnum role)
+            where TRoleEnum : struct
         {
+            if (!typeof(TRoleEnum).IsEnum)
+            {
+                throw new ArgumentException(TypeNotEnumMessage);
+            }
+
+            List<string>  roles = Enum.GetValues(typeof(TRoleEnum))
+                .Cast<TRoleEnum>()
+                .Where(r => (int) Enum.Parse(typeof(TRoleEnum), r.ToString()) <= (int) Enum.Parse(typeof(TRoleEnum), role.ToString()))
+                .Select(r => r.ToString())
+                .ToList();
+
             Principal user = new Principal
             {
                 Id = id,
                 Username = username,
-                Email = email
+                Email = email,
+                Roles = roles
             };
 
             this.Request.Session.AddParameter("principal", user);
@@ -53,14 +71,9 @@ namespace SIS.MvcFramework
             string layout = this.GetFileContent(LayoutPath);
             string content = this.GetFileContent($"{AppDir}views/{htmlFilePath}.html");
 
-            string nav = this.IsLoggedIn()
-                ? GetFileContent(LoggedInUserNavPath)
-                : GetFileContent(GuestNavPath);
+            string html = layout.Replace("@RenderBody()", content);
 
-            string html = layout.Replace("@RenderBody()", content)
-                .Replace("@RenderNav()", nav);
-
-            html = this.viewEngine.GetHtml(html, model, this.User);
+            html = this.viewEngine.GetHtml(html, model, this.ModelState, this.User);
 
             return new HtmlResult(html, httpResponseStatusCode);
         }
@@ -81,16 +94,6 @@ namespace SIS.MvcFramework
 
             return View<object>(null, $"{controllerName}/{action}", HttpResponseStatusCode.OK);
         }
-
-        protected IActionResult BadRequestError(string errorMessage)
-            => new HtmlResult(
-                $"<h1>{errorMessage}</h1>",
-                HttpResponseStatusCode.BadRequest);
-
-        protected IActionResult ServerError(string errorMessage)
-            => new HtmlResult(
-                $"<h1>{errorMessage}</h1>",
-                HttpResponseStatusCode.InternalServerError);
 
         protected string GetUsername()
             => this.User?.Username;

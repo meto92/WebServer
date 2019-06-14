@@ -3,6 +3,7 @@ using System.Xml.Serialization;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using SIS.MvcFramework.Mapping;
 
 namespace SIS.MvcFramework.Extensions
 {

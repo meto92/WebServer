@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +10,7 @@ using SIS.HTTP.Responses;
 using SIS.MvcFramework.Attributes.Action;
 using SIS.MvcFramework.Attributes.Methods;
 using SIS.MvcFramework.Attributes.Security;
+using SIS.MvcFramework.Attributes.Validation;
 using SIS.MvcFramework.DependencyContainer;
 using SIS.MvcFramework.Identity;
 using SIS.MvcFramework.Logging;
@@ -30,6 +32,53 @@ namespace SIS.MvcFramework
         static WebHost()
         {
             parametersByActionByControllerType = new Dictionary<Type, Dictionary<MethodInfo, ParameterInfo[]>>();
+        }
+
+        private static void ValidateBindingModels(Controller controller, IEnumerable<object> bindingModels)
+        {
+            foreach (object obj in bindingModels)
+            {
+                obj.GetType().GetProperties()
+                    .ToList()
+                    .ForEach(property =>
+                    {
+                        string propertyName = property.Name;
+
+                        IEnumerable<ValidationSisAttribute> validationAttributes = property
+                            .GetCustomAttributes<ValidationSisAttribute>();
+
+                        validationAttributes
+                            .Where(attr => !attr.IsValid(property.GetValue(obj)))
+                            .ToList()
+                            .ForEach(attr =>
+                            {
+                                controller.ModelState
+                                    .AddErrorMessage(propertyName, attr.ErrorMessage);
+                            });
+
+                        validationAttributes.Where(attr => attr.GetType() == typeof(PasswordSisAttribute))
+                            .Cast<PasswordSisAttribute>()
+                            .ToList()
+                            .ForEach(passwordAttribute =>
+                            {
+                                PropertyInfo confirmPasswordProperty = obj.GetType()
+                                    .GetProperty(passwordAttribute.ConfirmPasswordPropertyName);
+
+                                if (confirmPasswordProperty == null)
+                                {
+                                    throw new ArgumentException(PasswordSisAttribute.ConfirmPasswordPropertyNotFound);
+                                }
+
+                                if (property.GetValue(obj).ToString() != confirmPasswordProperty.GetValue(obj).ToString())
+                                {
+                                    controller.ModelState
+                                        .AddErrorMessage(
+                                            propertyName,
+                                            PasswordSisAttribute.PasswordsDoNotMatchMessage);
+                                }
+                            });
+                    });
+            }
         }
 
         private static Controller CreateController(Type controllerType, IServiceProvider serviceProvider)
@@ -61,6 +110,11 @@ namespace SIS.MvcFramework
             ParameterInfo[] actionParameters = parametersByActionByControllerType[controllerType][action];
 
             object[] actionParameterObjects = ActionParametersMapper.GetActionObjectParameters(actionParameters, request);
+
+            ValidateBindingModels(
+                controller, 
+                actionParameterObjects.Where(obj => obj.GetType().IsClass
+                    && !typeof(IEnumerable).IsAssignableFrom(obj.GetType())));
 
             return (IHttpResponse) action.Invoke(controller, actionParameterObjects);
         }
@@ -121,7 +175,7 @@ namespace SIS.MvcFramework
 
             AutoRegisterRoutes(app, serverRoutingTable, serviceProvider);
 
-            new Server(80, serverRoutingTable, httpSessionStorage).Run();
+            new Server(1300, serverRoutingTable, httpSessionStorage).Run();
         }
     }
 }

@@ -14,16 +14,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources\css\bootstrap.min.css">
+    <None Update="wwwroot\css\bootstrap.min.css">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\js\bootstrap.min.js">
+    <None Update="wwwroot\js\bootstrap.min.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\js\jquery-3.4.1.min.js">
+    <None Update="wwwroot\js\jquery-3.4.1.min.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\js\popper.min.js">
+    <None Update="wwwroot\js\popper.min.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Views\Albums\All.html">
@@ -33,12 +33,6 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Views\Albums\Details.html">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Views\Shared\GuestNav.html">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Views\Shared\LoggedInUserNav.html">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Update="Views\_Layout.html">

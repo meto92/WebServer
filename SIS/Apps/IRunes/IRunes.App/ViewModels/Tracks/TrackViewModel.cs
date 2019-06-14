@@ -1,4 +1,4 @@
-﻿namespace IRunes.App.ViewModels
+﻿namespace IRunes.App.ViewModels.Tracks
 {
     public class TrackViewModel
     {

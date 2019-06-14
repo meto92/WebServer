@@ -1,6 +1,6 @@
 ﻿using System.Linq;
-
-using IRunes.App.ViewModels;
+using IRunes.App.ViewModels.Albums;
+using IRunes.App.ViewModels.Tracks;
 using IRunes.Models;
 using IRunes.Services;
 
@@ -15,9 +15,6 @@ namespace IRunes.App.Controllers
     [Authorize]
     public class TracksController : Controller
     {
-        private const int MinTrackNameLength = 3;
-        private const int MinTrackLinkLength = 7;
-
         private readonly ITrackService trackService;
         private readonly IAlbumService albumService;
 
@@ -41,11 +38,19 @@ namespace IRunes.App.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(TrackCreateViewModel model, string albumId)
+        public IActionResult Create(TrackCreateInputModel model, string albumId)
         {
             if (albumId == null)
             {
                 return Redirect("/Albums/All");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(new AlbumViewModel
+                {
+                    Id = albumId
+                }, "/Tracks/Create", SIS.HTTP.Enums.HttpResponseStatusCode.BadRequest);
             }
 
             Album album = this.albumService.Find(albumId);
@@ -55,19 +60,11 @@ namespace IRunes.App.Controllers
                 return Redirect("/Albums/All");
             }
 
-            if (model.Name.Length < MinTrackNameLength
-                || model.Link.Length < MinTrackLinkLength
-                || !decimal.TryParse(model.PriceStr, out decimal price)
-                || price < 0)
-            {
-                return BadRequestError("Invalid data.");
-            }
-
             Track track = new Track()
             {
                 Name = model.Name,
                 Link = model.Link,
-                Price = price,
+                Price = (decimal) model.Price,
                 AlbumId = album.Id
             };
 

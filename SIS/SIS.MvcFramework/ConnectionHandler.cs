@@ -88,6 +88,11 @@ namespace SIS.MvcFramework
         {
             if (this.serverRoutingTable.Contains(httpRequest.RequestMethod, httpRequest.Path))
             {
+                Console.WriteLine(string.Format(
+                    ProcessingRequestMessage,
+                    httpRequest.RequestMethod,
+                    httpRequest.Path));
+
                 return this.serverRoutingTable
                     .Get(httpRequest.RequestMethod, httpRequest.Path)
                     .Invoke(httpRequest);
@@ -142,11 +147,6 @@ namespace SIS.MvcFramework
                     return;
                 }
 
-                Console.WriteLine(string.Format(
-                    ProcessingRequestMessage,
-                    httpRequest.RequestMethod,
-                    httpRequest.Path));
-
                 string sessionId = SetRequestSession(httpRequest);
 
                 httpResponse = this.HandleRequest(httpRequest);
@@ -154,8 +154,6 @@ namespace SIS.MvcFramework
                 httpResponse.AddCookie(new HttpCookie(
                     HttpSessionStorage.SessionCookieKey, 
                     sessionId));
-
-                Console.WriteLine();
             }
             catch (BadRequestException e)
             {

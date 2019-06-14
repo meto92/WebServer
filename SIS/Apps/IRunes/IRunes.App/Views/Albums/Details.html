@@ -18,7 +18,7 @@
         <ul>
             {int truckNumber = 0;}
 
-            @foreach (TrackViewModel track in Model.Tracks)
+            @foreach (var track in Model.Tracks)
             {
                 <li>@($"{++truckNumber}.") <a href="/Tracks/Details?albumId=@(Model.Id)&trackId=@track.Id"><em>@track.Name</em></a></li>
             }

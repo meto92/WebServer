@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using IRunes.App.ViewModels;
+using IRunes.App.ViewModels.Albums;
 using IRunes.Models;
 using IRunes.Services;
 
@@ -15,9 +15,6 @@ namespace IRunes.App.Controllers
     [Authorize]
     public class AlbumsController : Controller
     {
-        private const int MinAlbumNameLength = 3;
-        private const int MinAlbumCoverLength = 3;
-
         private readonly IAlbumService albumService;
 
         public AlbumsController(IAlbumService albumService)
@@ -39,12 +36,11 @@ namespace IRunes.App.Controllers
             => View();
 
         [HttpPost]
-        public IActionResult Create(AlbumCreateViewModel model)
+        public IActionResult Create(AlbumCreateInputModel model)
         {
-            if (model.Name.Length < MinAlbumNameLength
-                || model.Cover.Length < MinAlbumCoverLength)
+            if (!ModelState.IsValid)
             {
-                return BadRequestError("Invalid data");
+                return View();
             }
 
             Album album = new Album()

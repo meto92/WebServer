@@ -10,11 +10,6 @@ namespace SIS.MvcFramework.Mapping
 {
     public class ActionParametersMapper
     {
-        private static IEnumerable<PropertyInfo> GetBaseProperties(Type type)
-            => type.GetProperties()
-                .Where(pi => pi.PropertyType.IsPrimitive
-                    || new[] { typeof(string), typeof(decimal) }.Contains(pi.PropertyType));
-
         private static ISet<string> TryGetHttpParameter(string parameterName, IHttpRequest request)
         {
             parameterName = parameterName.ToUpper();
@@ -47,20 +42,90 @@ namespace SIS.MvcFramework.Mapping
 
             object model = Convert.ChangeType(Activator.CreateInstance(modelType), modelType);
 
-            IEnumerable<PropertyInfo> baseProperties = GetBaseProperties(modelType);
+            IEnumerable<PropertyInfo> modelProperties = modelType.GetProperties();
 
-            foreach (PropertyInfo pi in baseProperties)
+            foreach (PropertyInfo property in modelProperties)
             {
-                string value = TryGetHttpParameter(pi.Name, request)?.FirstOrDefault();
+                ISet<string> httpDataValue = TryGetHttpParameter(property.Name, request);
 
-                try
-                {
-                    pi.SetValue(model, Convert.ChangeType(value, pi.PropertyType));
-                }
-                catch { }
+                property.SetValue(model, GetValue(
+                    property.PropertyType, 
+                    httpDataValue, request));
             }
 
             return model;
+        }
+
+        private static object GetValue(Type parameterType, ISet<string> httpDataValue, IHttpRequest request)
+        {
+            object parameterValue = null;
+            string httpStringValue = httpDataValue?.FirstOrDefault();
+
+            if (parameterType.IsPrimitive
+                || new[] { typeof(string), typeof(decimal) }.Contains(parameterType))
+            {
+                try
+                {
+                    parameterValue = Convert.ChangeType(httpStringValue, parameterType);
+                }
+                catch
+                {
+                    parameterValue = Activator.CreateInstance(parameterType);
+                }
+            }
+            else if ((parameterType.IsArray || parameterType.IsGenericType
+                && typeof(IEnumerable).IsAssignableFrom(parameterType)))
+            {
+                if (httpDataValue == null)
+                {
+                    return null;
+                }
+
+                Type parameterGenericType = parameterType.IsArray
+                    ? parameterType.GetElementType()
+                    : parameterType.GenericTypeArguments[0];
+
+                try
+                {
+                    Type listGenericType = typeof(List<>)
+                        .MakeGenericType(parameterGenericType);
+                    IList list = (IList) Activator.CreateInstance(listGenericType);
+
+                    foreach (object item in httpDataValue)
+                    {
+                        list.Add(Convert.ChangeType(item, parameterGenericType));
+                    }
+
+                    if (parameterType.IsArray)
+                    {
+                        Array array = Array.CreateInstance(parameterGenericType, list.Count);
+
+                        list.CopyTo(array, 0);
+
+                        parameterValue = array;
+                    }
+                    else
+                    {
+                        if (parameterType.Name.Contains("Set"))
+                        {
+                            throw new NotImplementedException("Sets are not supported for action parameters");
+                        }
+                        else
+                        {
+                            // IEnumerable and list
+                            parameterValue = list;
+                        }
+                    }
+                }
+                catch
+                { }
+            }
+            else
+            {
+                parameterValue = ProcessBindingModel(parameterType, request);
+            }
+
+            return parameterValue;
         }
 
         public static object[] GetActionObjectParameters(ParameterInfo[] actionParameters, IHttpRequest request)
@@ -76,68 +141,7 @@ namespace SIS.MvcFramework.Mapping
 
                 ISet<string> httpDataValue = TryGetHttpParameter(parameterName, request);
 
-                string httpStringValue = httpDataValue?.FirstOrDefault();
-                object parameterValue = null;
-                
-                if (parameterType.IsPrimitive
-                    || new[] { typeof(string), typeof(decimal) }.Contains(parameterType))
-                {
-                    try
-                    {
-                        parameterValue = Convert.ChangeType(httpStringValue, parameter.ParameterType);
-                    }
-                    catch
-                    {
-                        parameterValue = Activator.CreateInstance(parameterType);
-                    }
-                }
-                else if ((parameterType.IsArray || parameterType.IsGenericType
-                    && typeof(IEnumerable).IsAssignableFrom(parameterType))
-                    && httpDataValue != null)
-                {
-                    Type parameterGenericType = parameterType.IsArray
-                        ? parameterType.GetElementType()
-                        : parameterType.GenericTypeArguments[0];
-
-                    try
-                    {
-                        Type listGenericType = typeof(List<>)
-                            .MakeGenericType(parameterGenericType);
-                        IList list = (IList) Activator.CreateInstance(listGenericType);
-                        
-                        foreach (object item in httpDataValue)
-                        {
-                            list.Add(Convert.ChangeType(item, parameterGenericType));
-                        }
-
-                        if (parameterType.IsArray)
-                        {
-                            Array array = Array.CreateInstance(parameterGenericType, list.Count);
-
-                            list.CopyTo(array, 0);
-                            
-                            parameterValue = array;
-                        }
-                        else
-                        {
-                            if (parameterType.Name.Contains("Set"))
-                            {
-                                throw new NotImplementedException("Sets are not supported for action parameters");
-                            }
-                            else
-                            {
-                                // IEnumerable and list
-                                parameterValue = list;
-                            }
-                        }
-                    }
-                    catch
-                    { }
-                }
-                else
-                {
-                    parameterValue = ProcessBindingModel(parameterType, request);
-                }
+                object parameterValue = GetValue(parameterType, httpDataValue, request);
 
                 actionParameterObjects[i] = parameterValue;
             }
